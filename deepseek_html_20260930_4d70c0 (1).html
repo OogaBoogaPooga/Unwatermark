@@ -1,0 +1,1796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unwatermark — Remove watermarks from video, free and offline</title>
+<meta name="description" content="Remove static watermarks from video in your browser. No uploads, no accounts, no credits, no length limits. Open source.">
+<meta name="theme-color" content="#0a0a0b">
+<meta property="og:title" content="Unwatermark — free video watermark remover">
+<meta property="og:description" content="Runs entirely on your device. No uploads, no accounts, no limits.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a0a0b'/><path d='M8 22V10h3.4l4.6 8 4.6-8H24v12h-3v-7l-3.6 6.2h-1.8L12 15v7z' fill='%23fff'/></svg>">
+
+<style>
+/* ============================================================
+   Design tokens
+   ============================================================ */
+:root{
+  --bg:#0a0a0b;
+  --surface:#111113;
+  --surface-2:#17171a;
+  --surface-3:#1d1d21;
+  --border:#252529;
+  --border-2:#33333a;
+  --text:#f2f2f4;
+  --text-2:#a1a1ab;
+  --text-3:#6d6d78;
+  --accent:#ffffff;
+  --good:#4ade80;
+  --good-dim:#16a34a;
+  --warn:#fbbf24;
+  --danger:#f87171;
+  --focus:#5b9dff;
+
+  --r-sm:6px;
+  --r:9px;
+  --r-lg:14px;
+
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+html[data-theme="light"]{
+  --bg:#fbfbfc;
+  --surface:#ffffff;
+  --surface-2:#f5f5f7;
+  --surface-3:#eeeef1;
+  --border:#e5e5ea;
+  --border-2:#d4d4dc;
+  --text:#0d0d10;
+  --text-2:#585863;
+  --text-3:#8b8b96;
+  --accent:#0d0d10;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px -14px rgba(0,0,0,.18);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+::selection{background:rgba(120,170,255,.28)}
+
+h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.021em; line-height:1.15}
+p{margin:0}
+a{color:inherit; text-decoration:none}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
+svg{display:block; flex:none}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px}
+
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:.92em}
+.wrap{max-width:1080px; margin:0 auto; padding:0 22px}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.nav{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{
+  max-width:1080px; margin:0 auto; padding:0 22px;
+  height:56px; display:flex; align-items:center; gap:24px;
+}
+.brand{display:flex; align-items:center; gap:9px; font-weight:600; letter-spacing:-.02em; font-size:15px}
+.brand svg{opacity:.95}
+.brand:hover{opacity:.8}
+.nav-links{display:flex; align-items:center; gap:4px; margin-left:auto}
+.nav-links a{
+  padding:6px 11px; border-radius:var(--r-sm); font-size:13.5px; color:var(--text-2);
+  transition:color .12s, background .12s;
+}
+.nav-links a:hover{color:var(--text); background:var(--surface-2)}
+.icon-btn{
+  width:32px;height:32px; display:grid; place-items:center; border-radius:var(--r-sm);
+  color:var(--text-2); transition:color .12s, background .12s;
+}
+.icon-btn:hover{color:var(--text); background:var(--surface-2)}
+@media (max-width:640px){ .nav-links a.hide-sm{display:none} }
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero{padding:74px 0 34px; text-align:center}
+.hero h1{
+  font-size:clamp(30px, 5.4vw, 50px);
+  letter-spacing:-.033em;
+  line-height:1.06;
+  max-width:15ch; margin:0 auto;
+}
+.hero h1 em{font-style:normal; color:var(--text-3)}
+.lede{
+  margin:20px auto 0; max-width:56ch; color:var(--text-2);
+  font-size:clamp(15px,1.7vw,17px); line-height:1.6;
+}
+.lede strong{color:var(--text); font-weight:500}
+.pill-row{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:26px}
+.pill{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:5px 11px 5px 9px; border-radius:999px;
+  border:1px solid var(--border); background:var(--surface);
+  font-size:12.5px; color:var(--text-2); letter-spacing:.005em;
+}
+.pill svg{opacity:.7}
+
+/* ============================================================
+   Tool shell
+   ============================================================ */
+.tool{margin:34px 0 0}
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+}
+
+/* --- dropzone --- */
+.dropzone{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:78px 24px; text-align:center; cursor:pointer;
+  transition:background .15s;
+  border-radius:var(--r-lg);
+}
+.dropzone:hover{background:var(--surface-2)}
+.dropzone.drag{background:var(--surface-3); box-shadow:inset 0 0 0 2px var(--focus)}
+.dz-icon{
+  width:52px;height:52px; display:grid; place-items:center;
+  border-radius:13px; background:var(--surface-3); border:1px solid var(--border);
+  color:var(--text-2);
+}
+.dropzone h2{font-size:17px; letter-spacing:-.015em}
+.dropzone p{color:var(--text-3); font-size:13.5px; max-width:40ch}
+.dz-btn{
+  margin-top:4px; display:inline-flex; align-items:center; gap:8px;
+  background:var(--accent); color:var(--bg);
+  padding:9px 17px; border-radius:var(--r); font-weight:500; font-size:14px;
+  transition:opacity .12s;
+}
+.dz-btn:hover{opacity:.86}
+
+/* --- workspace --- */
+.ws-bar{
+  display:flex; align-items:center; gap:12px;
+  padding:11px 14px; border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+}
+.ws-file{display:flex; align-items:center; gap:9px; min-width:0; flex:1}
+.ws-file svg{color:var(--text-3)}
+.ws-name{
+  font-size:13.5px; font-weight:500; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; max-width:34ch;
+}
+.ws-meta{font-size:12px; color:var(--text-3); white-space:nowrap}
+@media (max-width:640px){ .ws-meta{display:none} }
+
+.stage{
+  position:relative; background:#000; display:flex; justify-content:center; align-items:center;
+  min-height:180px; padding:0; overflow:hidden;
+}
+#preview{display:block; max-width:100%; height:auto; touch-action:none; cursor:crosshair}
+.stage-empty{
+  color:var(--text-3); font-size:13px; padding:60px 20px; text-align:center;
+}
+
+/* --- transport --- */
+.transport{padding:12px 14px; border-top:1px solid var(--border); background:var(--surface-2)}
+.scrub{
+  position:relative; height:22px; display:flex; align-items:center; cursor:pointer;
+  touch-action:none;
+}
+.scrub-track{position:absolute; left:0; right:0; height:4px; border-radius:2px; background:var(--surface-3); overflow:hidden}
+.scrub-fill{position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--text-3)}
+.scrub-head{
+  position:absolute; width:12px; height:12px; border-radius:50%; background:var(--accent);
+  transform:translateX(-50%); pointer-events:none; box-shadow:0 0 0 3px var(--surface-2);
+  transition:transform .1s;
+}
+.scrub:hover .scrub-head{transform:translateX(-50%) scale(1.15)}
+.t-row{display:flex; align-items:center; gap:12px; margin-top:2px}
+.t-btn{
+  width:32px;height:32px;display:grid;place-items:center;border-radius:var(--r-sm);
+  color:var(--text-2); transition:color .12s, background .12s;
+}
+.t-btn:hover{color:var(--text); background:var(--surface-3)}
+.t-time{font-family:var(--mono); font-size:12.5px; color:var(--text-3); letter-spacing:-.01em}
+.t-spacer{flex:1}
+
+/* --- side / bottom controls --- */
+.controls{
+  display:grid; grid-template-columns:1fr 260px; gap:0;
+  border-top:1px solid var(--border);
+}
+@media (max-width:820px){ .controls{grid-template-columns:1fr} }
+.regions-pane{padding:14px; border-right:1px solid var(--border); min-height:120px}
+@media (max-width:820px){ .regions-pane{border-right:0; border-bottom:1px solid var(--border)} }
+.settings-pane{padding:14px}
+
+.label{
+  font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:10px; display:flex; align-items:center; gap:8px;
+}
+.label .count{
+  background:var(--surface-3); color:var(--text-2); border-radius:4px;
+  padding:1px 6px; font-size:10.5px; letter-spacing:0;
+}
+.empty-note{color:var(--text-3); font-size:13px; padding:10px 0}
+
+.region-item{
+  display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-2); margin-bottom:6px;
+  cursor:pointer; transition:border-color .12s, background .12s;
+}
+.region-item:hover{border-color:var(--border-2)}
+.region-item.sel{border-color:var(--focus); background:var(--surface-3)}
+.region-idx{
+  width:20px;height:20px;display:grid;place-items:center;border-radius:4px;
+  background:var(--surface-3); font-size:11px; font-family:var(--mono); color:var(--text-2);
+}
+.region-item.sel .region-idx{background:var(--focus); color:#fff}
+.region-dims{font-family:var(--mono); font-size:11.5px; color:var(--text-3); flex:1}
+.region-del{
+  width:24px;height:24px;display:grid;place-items:center;border-radius:5px;color:var(--text-3);
+  transition:color .12s, background .12s;
+}
+.region-del:hover{color:var(--danger); background:var(--surface-3)}
+
+.setting{margin-bottom:14px}
+.setting:last-child{margin-bottom:0}
+.setting-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:7px}
+.setting-name{font-size:12.5px; color:var(--text-2)}
+.setting-val{font-family:var(--mono); font-size:11.5px; color:var(--text-3)}
+
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:100%; height:18px; background:transparent; cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{height:3px; border-radius:2px; background:var(--surface-3)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--accent);
+  margin-top:-5px; border:0;
+}
+input[type=range]::-moz-range-track{height:3px; border-radius:2px; background:var(--surface-3)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);border:0}
+
+.seg{display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm); padding:2px; gap:2px}
+.seg button{
+  flex:1; padding:5px 4px; border-radius:4px; font-size:12px; color:var(--text-3);
+  transition:background .12s, color .12s;
+}
+.seg button:hover{color:var(--text-2)}
+.seg button.on{background:var(--surface-3); color:var(--text); box-shadow:var(--shadow)}
+
+.switch-row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.switch{position:relative; width:34px; height:20px; flex:none}
+.switch input{position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; z-index:2}
+.switch .track{
+  position:absolute; inset:0; background:var(--surface-3); border-radius:99px;
+  border:1px solid var(--border-2); transition:background .15s;
+}
+.switch .knob{
+  position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%;
+  background:var(--text-3); transition:transform .15s, background .15s;
+}
+.switch input:checked ~ .track{background:var(--good-dim); border-color:var(--good-dim)}
+.switch input:checked ~ .knob{transform:translateX(14px); background:#fff}
+
+/* --- action bar --- */
+.actions{
+  display:flex; align-items:center; gap:10px; padding:13px 14px;
+  border-top:1px solid var(--border); background:var(--surface-2);
+}
+.btn{
+  display:inline-flex; align-items:center; gap:8px; padding:9px 16px;
+  border-radius:var(--r); font-size:13.5px; font-weight:500;
+  border:1px solid transparent; transition:opacity .12s, background .12s, border-color .12s;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--accent); color:var(--bg)}
+.btn-primary:hover:not(:disabled){opacity:.86}
+.btn-ghost{border-color:var(--border-2); color:var(--text-2)}
+.btn-ghost:hover:not(:disabled){background:var(--surface-3); color:var(--text)}
+.btn:disabled{opacity:.35; cursor:not-allowed}
+.btn-good{background:var(--good); color:#052e16}
+.btn-good:hover{opacity:.88}
+.actions .spacer{flex:1}
+
+/* --- progress --- */
+.progress-wrap{padding:0 14px 14px; background:var(--surface-2)}
+.progress{
+  height:3px; border-radius:2px; background:var(--surface-3); overflow:hidden; margin-top:2px;
+}
+.progress i{display:block; height:100%; width:0%; background:var(--good); transition:width .18s linear}
+.progress-label{
+  display:flex; justify-content:space-between; font-size:12px; color:var(--text-3);
+  margin-bottom:8px; font-family:var(--mono);
+}
+
+/* --- result --- */
+.result{border-top:1px solid var(--border); padding:14px; background:var(--surface-2)}
+#resultVideo{width:100%; border-radius:var(--r); background:#000; display:block}
+.result-row{display:flex; align-items:center; gap:12px; margin-top:13px; flex-wrap:wrap}
+.result-note{font-size:12.5px; color:var(--text-3); flex:1; min-width:200px}
+
+/* --- callout --- */
+.callout{
+  display:flex; gap:11px; padding:12px 14px; border-radius:var(--r);
+  border:1px solid var(--border); background:var(--surface-2);
+  font-size:13px; color:var(--text-2); line-height:1.55;
+}
+.callout svg{color:var(--text-3); margin-top:1px}
+.callout b{color:var(--text); font-weight:500}
+
+/* ============================================================
+   Content sections
+   ============================================================ */
+.section{padding:78px 0 0}
+.section-head{max-width:60ch; margin-bottom:34px}
+.section-head h2{font-size:clamp(21px,3vw,27px); letter-spacing:-.025em}
+.section-head p{color:var(--text-2); margin-top:11px; font-size:15px}
+
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+@media (max-width:820px){ .grid3{grid-template-columns:1fr} }
+.feature{
+  padding:20px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--surface);
+}
+.feature svg{color:var(--text-2); margin-bottom:13px}
+.feature h3{font-size:14.5px; margin-bottom:6px}
+.feature p{font-size:13.5px; color:var(--text-2); line-height:1.6}
+
+.steps{counter-reset:s; display:grid; gap:0}
+.step{
+  display:grid; grid-template-columns:44px 1fr; gap:18px; padding:19px 0;
+  border-bottom:1px solid var(--border);
+}
+.step:last-child{border-bottom:0}
+.step-n{
+  counter-increment:s; font-family:var(--mono); font-size:12px; color:var(--text-3);
+  padding-top:2px;
+}
+.step-n::before{content:"0" counter(s)}
+.step h3{font-size:14.5px; margin-bottom:5px}
+.step p{font-size:13.5px; color:var(--text-2); line-height:1.62; max-width:66ch}
+
+.faq{border-top:1px solid var(--border)}
+details{border-bottom:1px solid var(--border)}
+details summary{
+  list-style:none; cursor:pointer; padding:17px 0; font-size:14.5px; font-weight:500;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+details summary::-webkit-details-marker{display:none}
+details summary::after{
+  content:""; width:9px; height:9px; flex:none;
+  border-right:1.5px solid var(--text-3); border-bottom:1.5px solid var(--text-3);
+  transform:rotate(45deg) translateY(-2px); transition:transform .18s;
+}
+details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+details .ans{padding:0 0 19px; color:var(--text-2); font-size:13.5px; line-height:1.68; max-width:70ch}
+details .ans a{color:var(--text); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--border-2)}
+
+footer{
+  margin-top:96px; border-top:1px solid var(--border); padding:34px 0 52px;
+}
+.foot{display:flex; align-items:center; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--text-3)}
+.foot .spacer{flex:1}
+.foot a{color:var(--text-3); transition:color .12s}
+.foot a:hover{color:var(--text)}
+
+/* ============================================================
+   Off-screen media elements
+   ============================================================ */
+#srcVideo{position:fixed; left:0; bottom:0; width:2px; height:2px; opacity:.01; pointer-events:none; z-index:-1}
+#out{position:fixed; left:-10000px; top:0; pointer-events:none}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+
+<!-- ============================ HEADER ============================ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Unwatermark home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="21" height="21" rx="5.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M7 16V8h2.6l2.4 4.1L14.4 8H17v8h-2.1v-4.6L12.6 15h-1.2L9.1 11.4V16H7z" fill="currentColor"/>
+      </svg>
+      <span>Unwatermark</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#how" class="hide-sm">How it works</a>
+      <a href="#faq" class="hide-sm">FAQ</a>
+      <a href="https://github.com/" id="ghLink" target="_blank" rel="noopener">GitHub</a>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============================ HERO ============================ -->
+  <section class="hero">
+    <h1>Remove watermarks from video. <em>Right in your browser.</em></h1>
+    <p class="lede">
+      Every other tool either charges you, caps your clip at ten seconds, or uploads your file
+      to a server you've never heard of. This one does none of that.
+      <strong>Pick a video, draw a box, download the result.</strong>
+    </p>
+    <div class="pill-row">
+      <span class="pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2 4 6v6c0 5 3.4 9.3 8 10 4.6-.7 8-5 8-10V6z"/></svg>
+        Nothing is uploaded
+      </span>
+      <span class="pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        No length limit
+      </span>
+      <span class="pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        No account, no credits
+      </span>
+    </div>
+  </section>
+
+  <!-- ============================ TOOL ============================ -->
+  <section class="tool">
+    <div class="panel" id="panel">
+
+      <!-- Empty state -->
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose a video file">
+        <div class="dz-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15V3m0 0L8 7m4-4 4 4"/>
+            <path d="M3 15v3a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-3"/>
+          </svg>
+        </div>
+        <h2>Drop a video here</h2>
+        <p>MP4, WebM, MOV — anything your browser can play. Files stay on your machine.</p>
+        <span class="dz-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+          Browse files
+        </span>
+      </div>
+      <input type="file" id="fileInput" accept="video/*" class="sr">
+
+      <!-- Workspace -->
+      <div id="workspace" hidden>
+
+        <div class="ws-bar">
+          <div class="ws-file">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.5v5l4.5-2.5z"/>
+            </svg>
+            <span class="ws-name" id="wsName">video.mp4</span>
+          </div>
+          <span class="ws-meta mono" id="wsMeta">—</span>
+          <button class="icon-btn" id="resetBtn" title="Load a different video" aria-label="Load a different video">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="stage" id="stage">
+          <canvas id="preview"></canvas>
+        </div>
+
+        <div class="transport">
+          <div class="scrub" id="scrub" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="scrub-track"><div class="scrub-fill" id="scrubFill"></div></div>
+            <div class="scrub-head" id="scrubHead" style="left:0%"></div>
+          </div>
+          <div class="t-row">
+            <button class="t-btn" id="playBtn" aria-label="Play">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" id="playIcon"><path d="M8 5.5v13l11-6.5z"/></svg>
+            </button>
+            <span class="t-time"><span id="tCur">0:00</span> / <span id="tDur">0:00</span></span>
+            <span class="t-spacer"></span>
+            <span class="t-time" id="fpsHint"></span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="regions-pane">
+            <div class="label">
+              Watermark regions
+              <span class="count" id="regionCount">0</span>
+            </div>
+            <div id="regionList"></div>
+            <p class="empty-note" id="regionEmpty">
+              Drag a box on the preview above to mark a watermark. You can add as many as you need.
+            </p>
+          </div>
+
+          <div class="settings-pane">
+            <div class="label">Settings</div>
+
+            <div class="setting">
+              <div class="setting-head">
+                <span class="setting-name">Edge blend</span>
+                <span class="setting-val" id="featherVal">3 px</span>
+              </div>
+              <input type="range" id="feather" min="0" max="12" step="1" value="3">
+            </div>
+
+            <div class="setting">
+              <div class="setting-head">
+                <span class="setting-name">Quality</span>
+              </div>
+              <div class="seg" id="qualitySeg">
+                <button data-q="fast">Fast</button>
+                <button data-q="normal" class="on">Balanced</button>
+                <button data-q="high">Best</button>
+              </div>
+            </div>
+
+            <div class="setting">
+              <div class="switch-row">
+                <span class="setting-name">Live preview</span>
+                <label class="switch">
+                  <input type="checkbox" id="livePreview" checked>
+                  <span class="track"></span><span class="knob"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="processBtn" disabled>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m5 12 5 5L20 7"/>
+            </svg>
+            Remove watermark
+          </button>
+          <button class="btn btn-ghost" id="clearBtn" disabled>Clear regions</button>
+          <span class="spacer"></span>
+          <span class="t-time" id="estHint"></span>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap" hidden>
+          <div class="progress-label">
+            <span id="progressText">Processing</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress"><i id="progressBar"></i></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="panel" id="resultPanel" hidden style="margin-top:14px">
+      <div class="ws-bar">
+        <div class="ws-file">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m5 12 5 5L20 7"/>
+          </svg>
+          <span class="ws-name">Ready to download</span>
+        </div>
+        <span class="ws-meta mono" id="resultMeta"></span>
+      </div>
+      <div class="result">
+        <video id="resultVideo" controls playsinline></video>
+        <div class="result-row">
+          <a class="btn btn-good" id="downloadBtn" download>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+            </svg>
+            Download
+          </a>
+          <button class="btn btn-ghost" id="againBtn">Start over</button>
+          <p class="result-note" id="resultNote"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ HOW ============================ -->
+  <section class="section" id="how">
+    <div class="section-head">
+      <h2>How it actually works</h2>
+      <p>No magic, no hidden server. Here's exactly what happens to your pixels.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n"></div>
+        <div>
+          <h3>You mark the watermark</h3>
+          <p>Drag a rectangle over the logo, timestamp, or text. Regions are stored as fractions of the frame, so they scale correctly whatever the resolution.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n"></div>
+        <div>
+          <h3>We reconstruct the hole from its edges</h3>
+          <p>The marked pixels become a hole in the image. A multiscale diffusion solver fills it by propagating colour inward from the surrounding border — the same family of technique as Poisson inpainting in Photoshop's healing brush, just written in plain JavaScript.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n"></div>
+        <div>
+          <h3>The patch is blended back</h3>
+          <p>The filled area is composited with a smooth falloff at the edges, so there's no visible seam where the repair meets the original footage.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n"></div>
+        <div>
+          <h3>Frames are re-encoded locally</h3>
+          <p>Every processed frame is drawn to a canvas and captured by the browser's own encoder. Nothing is transmitted. When it's done, you get a file back.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ WHY ============================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2>Why this one is different</h2>
+    </div>
+    <div class="grid3">
+      <div class="feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 4v16"/>
+        </svg>
+        <h3>There is no server</h3>
+        <p>The whole app is a single HTML file. Once it's loaded you can disconnect from the internet and it still works. Nothing to log, nothing to leak.</p>
+      </div>
+      <div class="feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/>
+        </svg>
+        <h3>No artificial limits</h3>
+        <p>No ten-second caps, no 720p ceiling, no daily quota, no watermark added to the output to make you upgrade. Your hardware is the only limit.</p>
+      </div>
+      <div class="feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 18-6-6 6-6M15 6l6 6-6 6"/>
+        </svg>
+        <h3>Readable source</h3>
+        <p>MIT licensed and about a thousand lines. Audit the inpainting code yourself, fork it, or self-host it on your own domain in a couple of minutes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FAQ ============================ -->
+  <section class="section" id="faq">
+    <div class="section-head">
+      <h2>Questions</h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>Is it really free, or is there a catch?</summary>
+        <div class="ans">Really free. There's no account system, no payment processor, and no metered API — the computation happens on your CPU, so there's nothing for us to bill you for. The project is MIT licensed and hosted on static hosting that costs nothing to run.</div>
+      </details>
+      <details>
+        <summary>Where does my video go?</summary>
+        <div class="ans">Nowhere. The file is read into browser memory via a local blob URL and never leaves the page. You can verify this by opening DevTools → Network and watching that no requests fire while you process a clip. Better still: load the page, then turn off your Wi-Fi.</div>
+      </details>
+      <details>
+        <summary>How good is the result, honestly?</summary>
+        <div class="ans">It's very good on smooth backgrounds — sky, walls, gradients, shallow depth-of-field, static grain, solid colour. On busy or highly detailed backgrounds you'll see some softening or smearing in the repaired area, because the algorithm is reconstructing detail that isn't there. If a competitor claims perfect removal on complex footage, they're either using a generative model or lying.</div>
+      </details>
+      <details>
+        <summary>Can it remove a moving watermark?</summary>
+        <div class="ans">Not with a single box. If the watermark drifts across the frame you'd need to keyframe it, which this tool doesn't do yet. If it's in the same place for the whole clip — which is the case for most broadcast logos, timestamps, and stock-footage marks — you're fine.</div>
+      </details>
+      <details>
+        <summary>Why does exporting take as long as the video itself?</summary>
+        <div class="ans">Browser video encoding through <code class="mono">MediaRecorder</code> runs against the wall clock, so the clip plays through once while frames are captured. A two-minute video takes about two minutes. Faster-than-realtime export is possible with the WebCodecs API and is on the roadmap.</div>
+      </details>
+      <details>
+        <summary>What format do I get back?</summary>
+        <div class="ans">Whichever your browser can encode best — usually MP4 (H.264) in Chrome and Safari, WebM (VP9) in Firefox. Audio is preserved where the browser allows it. Output bitrate is scaled to resolution automatically.</div>
+      </details>
+      <details>
+        <summary>Is this legal to use?</summary>
+        <div class="ans">Depends entirely on what you're removing and why. Stripping a watermark from content you don't own or have a licence for is copyright infringement in most jurisdictions, and removing attribution can breach platform terms. Common legitimate uses: cleaning up footage you shot yourself, removing a stock preview mark after licensing, clearing a client's logo from a rough cut, or de-cluttering archive material you hold rights to. That's on you to get right.</div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>Unwatermark — MIT licensed, no telemetry.</span>
+    <span class="spacer"></span>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://github.com/" id="ghLink2" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+<!-- Off-screen media -->
+<video id="srcVideo" playsinline preload="auto" crossorigin="anonymous"></video>
+<canvas id="out"></canvas>
+
+<script>
+"use strict";
+(() => {
+
+/* ============================================================
+   0. Small helpers
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+function fmtTime(sec){
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ":" + String(s).padStart(2, "0");
+}
+function fmtBytes(b){
+  if (b < 1048576) return (b / 1024).toFixed(0) + " KB";
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + " MB";
+  return (b / 1073741824).toFixed(2) + " GB";
+}
+
+/* ============================================================
+   1. Theme
+   ============================================================ */
+(function theme(){
+  const saved = localStorage.getItem("uw-theme");
+  const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+  document.documentElement.dataset.theme = saved || (prefersLight ? "light" : "dark");
+  $("themeBtn").addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("uw-theme", next);
+  });
+})();
+
+/* ============================================================
+   2. State
+   ============================================================ */
+const video    = $("srcVideo");
+const preview  = $("preview");
+const pctx     = preview.getContext("2d");
+const out      = $("out");
+const octx     = out.getContext("2d", { willReadFrequently: true });
+
+const S = {
+  url: null,
+  name: "",
+  vw: 0, vh: 0,
+  duration: 0,
+  regions: [],        // { x, y, w, h }  — all normalised 0..1
+  selected: -1,
+  quality: "normal",
+  feather: 3,
+  live: true,
+  playing: false,
+  exporting: false,
+  rafId: 0,
+  lastFrameCost: 0,
+};
+
+const QUALITY = {
+  fast:   { coarse: 40,  fine: 3 },
+  normal: { coarse: 90,  fine: 5 },
+  high:   { coarse: 170, fine: 9 },
+};
+
+/* ============================================================
+   3. Audio graph
+   ------------------------------------------------------------
+   Element audio is routed into a MediaStreamDestination for the
+   recorder, and separately through a gain node to the speakers.
+   During export the gain is dropped to zero so the render is
+   silent while still carrying an audio track.
+   ============================================================ */
+let audioCtx = null, gainNode = null, mediaDest = null, audioReady = false;
+
+function initAudio(){
+  if (audioReady) return;
+  audioReady = true;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioCtx.createMediaElementSource(video);
+    mediaDest = audioCtx.createMediaStreamDestination();
+    gainNode  = audioCtx.createGain();
+    src.connect(mediaDest);
+    src.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+  } catch (e) {
+    audioCtx = null; mediaDest = null; gainNode = null;
+  }
+}
+
+/* ============================================================
+   4. File loading
+   ============================================================ */
+const dropzone  = $("dropzone");
+const fileInput = $("fileInput");
+
+dropzone.addEventListener("click", () => fileInput.click());
+dropzone.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+});
+fileInput.addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) loadFile(f);
+  fileInput.value = "";
+});
+
+["dragenter","dragover"].forEach(ev =>
+  dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add("drag"); })
+);
+["dragleave","drop"].forEach(ev =>
+  dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove("drag"); })
+);
+dropzone.addEventListener("drop", e => {
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) loadFile(f);
+});
+
+function loadFile(file){
+  if (!file.type.startsWith("video/")) {
+    alert("That doesn't look like a video file. Try MP4, WebM, or MOV.");
+    return;
+  }
+
+  if (S.url) URL.revokeObjectURL(S.url);
+  S.url  = URL.createObjectURL(file);
+  S.name = file.name || "video";
+  S.regions = [];
+  S.selected = -1;
+  S.playing = false;
+
+  $("resultPanel").hidden = true;
+  $("progressWrap").hidden = true;
+  $("workspace").hidden = false;
+  $("dropzone").hidden = true;
+  $("wsName").textContent = S.name;
+
+  video.src = S.url;
+  video.load();
+
+  video.onloadedmetadata = () => {
+    S.vw = video.videoWidth;
+    S.vh = video.videoHeight;
+    S.duration = isFinite(video.duration) ? video.duration : 0;
+
+    if (!S.vw || !S.vh) {
+      alert("This video reports no dimensions — the codec may not be supported by your browser.");
+      resetAll();
+      return;
+    }
+
+    $("wsMeta").textContent = S.vw + "×" + S.vh + " · " + fmtTime(S.duration);
+    $("tDur").textContent = fmtTime(S.duration);
+    $("fpsHint").textContent = "";
+
+    sizePreview();
+    initAudio();
+    renderRegions();
+    startLoop();
+  };
+
+  video.onerror = () => {
+    alert("Your browser can't decode this file. Try converting it to MP4 (H.264) first.");
+    resetAll();
+  };
+}
+
+function resetAll(){
+  video.pause();
+  if (S.url) { URL.revokeObjectURL(S.url); S.url = null; }
+  S.regions = []; S.selected = -1; S.playing = false;
+  stopLoop();
+  $("workspace").hidden = true;
+  $("dropzone").hidden = false;
+  $("resultPanel").hidden = true;
+  $("progressWrap").hidden = true;
+  video.removeAttribute("src");
+  video.load();
+}
+
+$("resetBtn").addEventListener("click", resetAll);
+$("againBtn").addEventListener("click", () => {
+  $("resultPanel").hidden = true;
+  $("resultVideo").pause();
+  $("resultVideo").removeAttribute("src");
+  window.scrollTo({ top: $("panel").offsetTop - 80, behavior: "smooth" });
+});
+
+/* ============================================================
+   5. Preview sizing
+   ============================================================ */
+function sizePreview(){
+  const stage = $("stage");
+  const avail = Math.max(280, stage.clientWidth || 900);
+  const availH = Math.max(220, Math.round(window.innerHeight * 0.58));
+
+  const scale = Math.min(avail / S.vw, availH / S.vh, 1);
+  const cssW = Math.round(S.vw * scale);
+  const cssH = Math.round(S.vh * scale);
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  preview.style.width  = cssW + "px";
+  preview.style.height = cssH + "px";
+  preview.width  = Math.round(cssW * dpr);
+  preview.height = Math.round(cssH * dpr);
+}
+
+let resizeTimer = 0;
+window.addEventListener("resize", () => {
+  if (!S.vw) return;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(sizePreview, 140);
+});
+
+/* ============================================================
+   6. Render loop
+   ============================================================ */
+function startLoop(){
+  stopLoop();
+  const loop = () => {
+    drawFrame();
+    S.rafId = requestAnimationFrame(loop);
+  };
+  S.rafId = requestAnimationFrame(loop);
+}
+function stopLoop(){
+  if (S.rafId) cancelAnimationFrame(S.rafId);
+  S.rafId = 0;
+}
+
+function drawFrame(){
+  if (!S.vw || video.readyState < 2) return;
+
+  const W = preview.width, H = preview.height;
+  pctx.drawImage(video, 0, 0, W, H);
+
+  const t0 = performance.now();
+
+  // Live inpainting preview
+  if (S.live && S.regions.length) {
+    const q = S.playing ? QUALITY.fast : QUALITY[S.quality];
+    for (const r of S.regions) {
+      inpaintRegion(pctx, W, H, r, S.feather, q);
+    }
+  }
+
+  drawOverlay();
+
+  S.lastFrameCost = S.lastFrameCost * 0.85 + (performance.now() - t0) * 0.15;
+
+  // Timeline
+  if (S.duration > 0) {
+    const p = clamp(video.currentTime / S.duration, 0, 1) * 100;
+    $("scrubFill").style.width = p + "%";
+    $("scrubHead").style.left = p + "%";
+    $("scrub").setAttribute("aria-valuenow", Math.round(p));
+  }
+  $("tCur").textContent = fmtTime(video.currentTime);
+}
+
+function drawOverlay(){
+  const W = preview.width, H = preview.height;
+
+  if (S.regions.length) {
+    // Dim everything outside the union of regions (even-odd fill)
+    pctx.save();
+    pctx.beginPath();
+    pctx.rect(0, 0, W, H);
+    for (const r of S.regions) {
+      pctx.rect(r.x * W, r.y * H, r.w * W, r.h * H);
+    }
+    pctx.fillStyle = "rgba(0,0,0,0.42)";
+    pctx.fill("evenodd");
+    pctx.restore();
+  }
+
+  const dpr = W / (parseFloat(preview.style.width) || W);
+
+  S.regions.forEach((r, i) => {
+    const x = r.x * W, y = r.y * H, w = r.w * W, h = r.h * H;
+    const active = i === S.selected;
+
+    pctx.save();
+    pctx.lineWidth = Math.max(1.25, 1.4 * dpr);
+    pctx.strokeStyle = active ? "#5b9dff" : "rgba(255,255,255,0.62)";
+    pctx.setLineDash(active ? [] : [5 * dpr, 4 * dpr]);
+    pctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    pctx.setLineDash([]);
+
+    if (active) {
+      const hs = 8 * dpr;
+      const pts = [
+        [x, y], [x + w / 2, y], [x + w, y],
+        [x + w, y + h / 2], [x + w, y + h],
+        [x + w / 2, y + h], [x, y + h], [x, y + h / 2]
+      ];
+      pctx.fillStyle = "#5b9dff";
+      pctx.strokeStyle = "#fff";
+      pctx.lineWidth = 1.2 * dpr;
+      for (const [px, py] of pts) {
+        pctx.beginPath();
+        pctx.rect(px - hs / 2, py - hs / 2, hs, hs);
+        pctx.fill();
+        pctx.stroke();
+      }
+    }
+    pctx.restore();
+  });
+}
+
+/* ============================================================
+   7. Region interaction
+   ============================================================ */
+let drag = null;
+
+function canvasPoint(e){
+  const rect = preview.getBoundingClientRect();
+  return {
+    x: clamp((e.clientX - rect.left) / rect.width,  0, 1),
+    y: clamp((e.clientY - rect.top)  / rect.height, 0, 1),
+  };
+}
+
+function hitTest(p){
+  const HANDLE = 0.014; // normalised handle radius
+
+  // Selected region handles first
+  if (S.selected >= 0 && S.selected < S.regions.length) {
+    const r = S.regions[S.selected];
+    const corners = {
+      nw: [r.x, r.y],
+      ne: [r.x + r.w, r.y],
+      sw: [r.x, r.y + r.h],
+      se: [r.x + r.w, r.y + r.h],
+    };
+    for (const k in corners) {
+      const [cx, cy] = corners[k];
+      if (Math.abs(p.x - cx) < HANDLE && Math.abs(p.y - cy) < HANDLE) {
+        return { type: "resize", handle: k, index: S.selected };
+      }
+    }
+  }
+
+  // Region bodies — topmost first
+  for (let i = S.regions.length - 1; i >= 0; i--) {
+    const r = S.regions[i];
+    if (p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h) {
+      return { type: "move", index: i, ox: p.x - r.x, oy: p.y - r.y };
+    }
+  }
+
+  return { type: "create" };
+}
+
+preview.addEventListener("pointerdown", e => {
+  if (S.exporting) return;
+  e.preventDefault();
+  preview.setPointerCapture(e.pointerId);
+
+  const p = canvasPoint(e);
+  const hit = hitTest(p);
+
+  if (hit.type === "create") {
+    drag = { type: "create", ax: p.x, ay: p.y };
+  } else if (hit.type === "move") {
+    S.selected = hit.index;
+    drag = { type: "move", index: hit.index, ox: hit.ox, oy: hit.oy, startX: p.x, startY: p.y, orig: { ...S.regions[hit.index] } };
+    renderRegions();
+  } else {
+    S.selected = hit.index;
+    drag = { type: "resize", index: hit.index, handle: hit.handle, orig: { ...S.regions[hit.index] } };
+    renderRegions();
+  }
+});
+
+preview.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const p = canvasPoint(e);
+
+  if (drag.type === "create") {
+    const x = Math.min(drag.ax, p.x), y = Math.min(drag.ay, p.y);
+    const w = Math.abs(p.x - drag.ax), h = Math.abs(p.y - drag.ay);
+    // Live-create: keep it as a provisional region
+    if (w > 0.012 && h > 0.012) {
+      if (S.regions.length && drag.provisional) {
+        S.regions[S.regions.length - 1] = { x, y, w, h };
+      } else {
+        S.regions.push({ x, y, w, h });
+        drag.provisional = true;
+        S.selected = S.regions.length - 1;
+      }
+      renderRegions();
+    }
+  }
+
+  else if (drag.type === "move") {
+    const o = drag.orig;
+    const nx = clamp(drag.orig.x + (p.x - drag.startX), 0, 1 - o.w);
+    const ny = clamp(drag.orig.y + (p.y - drag.startY), 0, 1 - o.h);
+    S.regions[drag.index] = { x: nx, y: ny, w: o.w, h: o.h };
+    renderRegions();
+  }
+
+  else if (drag.type === "resize") {
+    const o = drag.orig;
+    let x0 = o.x, y0 = o.y, x1 = o.x + o.w, y1 = o.y + o.h;
+
+    if (drag.handle.includes("w")) x0 = clamp(p.x, 0, x1 - 0.015);
+    if (drag.handle.includes("e")) x1 = clamp(p.x, x0 + 0.015, 1);
+    if (drag.handle.includes("n")) y0 = clamp(p.y, 0, y1 - 0.015);
+    if (drag.handle.includes("s")) y1 = clamp(p.y, y0 + 0.015, 1);
+
+    S.regions[drag.index] = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    renderRegions();
+  }
+});
+
+function endDrag(e){
+  if (!drag) return;
+  try { preview.releasePointerCapture(e.pointerId); } catch (_) {}
+  if (drag.type === "create" && !drag.provisional) {
+    // Click without a drag — treat as deselect
+    S.selected = -1;
+  }
+  drag = null;
+  renderRegions();
+}
+preview.addEventListener("pointerup", endDrag);
+preview.addEventListener("pointercancel", endDrag);
+
+/* ============================================================
+   8. Region list UI
+   ============================================================ */
+function renderRegions(){
+  const list  = $("regionList");
+  const count = $("regionCount");
+  const empty = $("regionEmpty");
+
+  count.textContent = S.regions.length;
+  empty.hidden = S.regions.length > 0;
+
+  // Rebuild list
+  list.textContent = "";
+  S.regions.forEach((r, i) => {
+    const px = Math.round(r.w * S.vw), py = Math.round(r.h * S.vh);
+
+    const row = document.createElement("div");
+    row.className = "region-item" + (i === S.selected ? " sel" : "");
+    row.addEventListener("click", ev => {
+      if (ev.target.closest(".region-del")) return;
+      S.selected = (S.selected === i) ? -1 : i;
+      renderRegions();
+    });
+
+    const idx = document.createElement("span");
+    idx.className = "region-idx";
+    idx.textContent = String(i + 1);
+
+    const dims = document.createElement("span");
+    dims.className = "region-dims";
+    dims.textContent = px + " × " + py + " px";
+
+    const del = document.createElement("button");
+    del.className = "region-del";
+    del.title = "Delete region";
+    del.setAttribute("aria-label", "Delete region " + (i + 1));
+    del.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    del.addEventListener("click", ev => {
+      ev.stopPropagation();
+      S.regions.splice(i, 1);
+      if (S.selected >= S.regions.length) S.selected = S.regions.length - 1;
+      renderRegions();
+    });
+
+    row.append(idx, dims, del);
+    list.appendChild(row);
+  });
+
+  const has = S.regions.length > 0;
+  $("processBtn").disabled = !has || S.exporting;
+  $("clearBtn").disabled   = !has || S.exporting;
+
+  updateEstimate();
+}
+
+function updateEstimate(){
+  if (!S.duration || !S.regions.length) { $("estHint").textContent = ""; return; }
+  $("estHint").textContent = "Export takes about " + fmtTime(S.duration) + " (real time)";
+}
+
+$("clearBtn").addEventListener("click", () => {
+  S.regions = [];
+  S.selected = -1;
+  renderRegions();
+});
+
+/* ============================================================
+   9. Settings UI
+   ============================================================ */
+$("feather").addEventListener("input", e => {
+  S.feather = +e.target.value;
+  $("featherVal").textContent = S.feather + " px";
+});
+
+$("qualitySeg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-q]");
+  if (!btn) return;
+  S.quality = btn.dataset.q;
+  [...$("qualitySeg").children].forEach(b => b.classList.toggle("on", b === btn));
+});
+
+$("livePreview").addEventListener("change", e => {
+  S.live = e.target.checked;
+});
+
+/* ============================================================
+   10. Transport
+   ============================================================ */
+$("playBtn").addEventListener("click", togglePlay);
+
+function togglePlay(){
+  if (!S.vw || S.exporting) return;
+  if (video.paused) {
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    video.play().catch(() => {});
+  } else {
+    video.pause();
+  }
+}
+
+video.addEventListener("play",  () => { S.playing = true;  setPlayIcon(true);  });
+video.addEventListener("pause", () => { S.playing = false; setPlayIcon(false); });
+video.addEventListener("ended", () => { S.playing = false; setPlayIcon(false); });
+
+function setPlayIcon(playing){
+  $("playIcon").innerHTML = playing
+    ? '<path d="M8 5h3v14H8zM13 5h3v14h-3z"/>'
+    : '<path d="M8 5.5v13l11-6.5z"/>';
+  $("playBtn").setAttribute("aria-label", playing ? "Pause" : "Play");
+}
+
+/* Scrubbing */
+const scrub = $("scrub");
+let scrubbing = false;
+
+function scrubTo(e){
+  if (!S.duration) return;
+  const rect = scrub.getBoundingClientRect();
+  const p = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+  video.currentTime = p * S.duration;
+}
+
+scrub.addEventListener("pointerdown", e => {
+  if (!S.duration || S.exporting) return;
+  scrubbing = true;
+  scrub.setPointerCapture(e.pointerId);
+  scrubTo(e);
+});
+scrub.addEventListener("pointermove", e => { if (scrubbing) scrubTo(e); });
+scrub.addEventListener("pointerup", e => {
+  scrubbing = false;
+  try { scrub.releasePointerCapture(e.pointerId); } catch (_) {}
+});
+scrub.addEventListener("keydown", e => {
+  if (!S.duration) return;
+  if (e.key === "ArrowRight") { e.preventDefault(); video.currentTime = clamp(video.currentTime + 1, 0, S.duration); }
+  if (e.key === "ArrowLeft")  { e.preventDefault(); video.currentTime = clamp(video.currentTime - 1, 0, S.duration); }
+});
+
+/* Keyboard shortcuts */
+document.addEventListener("keydown", e => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
+
+  if (e.code === "Space" && S.vw && !S.exporting) {
+    e.preventDefault();
+    togglePlay();
+  }
+  if ((e.key === "Delete" || e.key === "Backspace") && S.selected >= 0 && S.regions.length) {
+    e.preventDefault();
+    S.regions.splice(S.selected, 1);
+    S.selected = Math.min(S.selected, S.regions.length - 1);
+    renderRegions();
+  }
+  if (e.key === "Escape") {
+    S.selected = -1;
+    renderRegions();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && S.regions.length) {
+    e.preventDefault();
+    S.regions.pop();
+    S.selected = S.regions.length - 1;
+    renderRegions();
+  }
+});
+
+/* ============================================================
+   11. THE INPAINTING CORE
+   ------------------------------------------------------------
+   Multiscale diffusion. The hole is filled by solving Laplace's
+   equation with Dirichlet boundary conditions, using a coarse-to-
+   fine pyramid so low frequencies converge in a handful of passes
+   rather than thousands.
+
+   Steps:
+     1. Build a pyramid. Each coarser pixel averages whichever of
+        its four children are "known"; a coarse pixel is a hole
+        only if all four children are holes.
+     2. Solve the coarsest level with many Gauss-Seidel sweeps.
+     3. Upsample into the level below (writing only into holes),
+        then run a few refinement sweeps. Repeat down to full res.
+     4. Composite the repaired pixels back with a feathered alpha.
+   ============================================================ */
+
+function buildPyramid(rgb, mask, w, h){
+  const levels = [{ rgb, mask, w, h }];
+  let cw = w, ch = h, crgb = rgb, cmask = mask;
+
+  while (cw > 6 || ch > 6) {
+    const nw = Math.max(1, cw >> 1);
+    const nh = Math.max(1, ch >> 1);
+    const nrgb = new Float32Array(nw * nh * 3);
+    const nmask = new Uint8Array(nw * nh);
+
+    for (let y = 0; y < nh; y++) {
+      for (let x = 0; x < nw; x++) {
+        let r = 0, g = 0, b = 0, n = 0;
+
+        for (let dy = 0; dy < 2; dy++) {
+          const sy = (y << 1) + dy;
+          if (sy >= ch) break;
+          for (let dx = 0; dx < 2; dx++) {
+            const sx = (x << 1) + dx;
+            if (sx >= cw) break;
+            const si = sy * cw + sx;
+            if (cmask[si]) continue;
+            r += crgb[si * 3];
+            g += crgb[si * 3 + 1];
+            b += crgb[si * 3 + 2];
+            n++;
+          }
+        }
+
+        const di = y * nw + x;
+        if (n > 0) {
+          nrgb[di * 3]     = r / n;
+          nrgb[di * 3 + 1] = g / n;
+          nrgb[di * 3 + 2] = b / n;
+        } else {
+          nmask[di] = 1;
+        }
+      }
+    }
+
+    levels.push({ rgb: nrgb, mask: nmask, w: nw, h: nh });
+    cw = nw; ch = nh; crgb = nrgb; cmask = nmask;
+  }
+
+  return levels;
+}
+
+function diffuse(level, iterations){
+  const { rgb, mask, w, h } = level;
+
+  for (let it = 0; it < iterations; it++) {
+    for (let y = 0; y < h; y++) {
+      const row = y * w;
+      for (let x = 0; x < w; x++) {
+        const i = row + x;
+        if (!mask[i]) continue;
+
+        let r = 0, g = 0, b = 0, n = 0;
+
+        if (x > 0)     { const j = (i - 1) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
+        if (x < w - 1) { const j = (i + 1) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
+        if (y > 0)     { const j = (i - w) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
+        if (y < h - 1) { const j = (i + w) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
+
+        if (n) {
+          const o = i * 3;
+          rgb[o]     = r / n;
+          rgb[o + 1] = g / n;
+          rgb[o + 2] = b / n;
+        }
+      }
+    }
+  }
+}
+
+function upsampleInto(src, sw, sh, dst, dw, dh, dmask){
+  for (let y = 0; y < dh; y++) {
+    const fy = ((y + 0.5) * sh / dh) - 0.5;
+    let y0 = Math.floor(fy);
+    const wy = fy - y0;
+    let y1 = y0 + 1;
+
+    if (y0 < 0) y0 = 0;
+    if (y1 < 0) y1 = 0;
+    if (y0 > sh - 1) y0 = sh - 1;
+    if (y1 > sh - 1) y1 = sh - 1;
+
+    const rowA = y0 * sw, rowB = y1 * sw;
+    const drow = y * dw;
+
+    for (let x = 0; x < dw; x++) {
+      const i = drow + x;
+      if (!dmask[i]) continue;
+
+      const fx = ((x + 0.5) * sw / dw) - 0.5;
+      let x0 = Math.floor(fx);
+      const wx = fx - x0;
+      let x1 = x0 + 1;
+
+      if (x0 < 0) x0 = 0;
+      if (x1 < 0) x1 = 0;
+      if (x0 > sw - 1) x0 = sw - 1;
+      if (x1 > sw - 1) x1 = sw - 1;
+
+      const a0 = (rowA + x0) * 3, a1 = (rowA + x1) * 3;
+      const b0 = (rowB + x0) * 3, b1 = (rowB + x1) * 3;
+      const o  = i * 3;
+
+      for (let c = 0; c < 3; c++) {
+        const top = src[a0 + c] + (src[a1 + c] - src[a0 + c]) * wx;
+        const bot = src[b0 + c] + (src[b1 + c] - src[b0 + c]) * wx;
+        dst[o + c] = top + (bot - top) * wy;
+      }
+    }
+  }
+}
+
+function solveInpaint(rgb, mask, w, h, q){
+  const levels = buildPyramid(rgb, mask, w, h);
+
+  // Coarsest level: solve properly.
+  diffuse(levels[levels.length - 1], q.coarse);
+
+  // Refine downward.
+  for (let l = levels.length - 2; l >= 0; l--) {
+    const fine   = levels[l];
+    const coarse = levels[l + 1];
+    upsampleInto(coarse.rgb, coarse.w, coarse.h, fine.rgb, fine.w, fine.h, fine.mask);
+    diffuse(fine, q.fine);
+  }
+
+  return rgb; // levels[0].rgb is the same reference
+}
+
+/* ------------------------------------------------------------
+   inpaintRegion — works on any 2D context.
+   region: { x, y, w, h } normalised
+   feather: blend width in canvas pixels
+   ------------------------------------------------------------ */
+function inpaintRegion(ctx, W, H, region, feather, q){
+  const fx0 = region.x * W;
+  const fy0 = region.y * H;
+  const fx1 = fx0 + region.w * W;
+  const fy1 = fy0 + region.h * H;
+
+  const fe  = Math.max(0, feather);
+  const pad = Math.ceil(fe) + 2;
+
+  const x0 = Math.max(0, Math.floor(fx0 - pad));
+  const y0 = Math.max(0, Math.floor(fy0 - pad));
+  const x1 = Math.min(W, Math.ceil(fx1 + pad));
+  const y1 = Math.min(H, Math.ceil(fy1 + pad));
+
+  const rw = x1 - x0, rh = y1 - y0;
+  if (rw < 4 || rh < 4) return;
+
+  let img;
+  try { img = ctx.getImageData(x0, y0, rw, rh); }
+  catch (_) { return; }   // tainted canvas or OOM — skip silently
+
+  const data = img.data;
+
+  // --- Mask: the selection expanded by the feather width ---
+  const mx0 = Math.max(0, fx0 - fe - x0);
+  const my0 = Math.max(0, fy0 - fe - y0);
+  const mx1 = Math.min(rw, fx1 + fe - x0);
+  const my1 = Math.min(rh, fy1 + fe - y0);
+
+  const mask = new Uint8Array(rw * rh);
+  const ix0 = Math.max(0, Math.floor(mx0));
+  const iy0 = Math.max(0, Math.floor(my0));
+  const ix1 = Math.min(rw, Math.ceil(mx1));
+  const iy1 = Math.min(rh, Math.ceil(my1));
+
+  for (let y = iy0; y < iy1; y++) {
+    const row = y * rw;
+    for (let x = ix0; x < ix1; x++) mask[row + x] = 1;
+  }
+
+  // --- Unpack to float RGB ---
+  const rgb = new Float32Array(rw * rh * 3);
+  for (let i = 0, p = 0; i < rw * rh; i++, p += 4) {
+    rgb[i * 3]     = data[p];
+    rgb[i * 3 + 1] = data[p + 1];
+    rgb[i * 3 + 2] = data[p + 2];
+  }
+
+  // --- Solve ---
+  solveInpaint(rgb, mask, rw, rh, q);
+
+  // --- Composite back with feathered alpha ---
+  const lfx0 = fx0 - x0, lfy0 = fy0 - y0;
+  const lfx1 = fx1 - x0, lfy1 = fy1 - y0;
+  const hardEdge = fe < 0.5;
+
+  for (let y = 0; y < rh; y++) {
+    const dy = Math.max(lfy0 - y, 0, y - (lfy1 - 1));
+    const row = y * rw;
+
+    for (let x = 0; x < rw; x++) {
+      const i = row + x;
+      if (!mask[i]) continue;
+
+      const dx = Math.max(lfx0 - x, 0, x - (lfx1 - 1));
+
+      let a;
+      if (dx <= 0 && dy <= 0) {
+        a = 1;
+      } else if (hardEdge) {
+        a = 1;
+      } else {
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d >= fe) continue;
+        const t = 1 - d / fe;
+        a = t * t * (3 - 2 * t);   // smoothstep
+      }
+
+      const p = i * 4;
+      data[p]     += (rgb[i * 3]     - data[p])     * a;
+      data[p + 1] += (rgb[i * 3 + 1] - data[p + 1]) * a;
+      data[p + 2] += (rgb[i * 3 + 2] - data[p + 2]) * a;
+    }
+  }
+
+  ctx.putImageData(img, x0, y0);
+}
+
+/* ============================================================
+   12. Export
+   ============================================================ */
+function pickMime(){
+  const candidates = [
+    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+    "video/mp4",
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm"
+  ];
+  if (typeof MediaRecorder === "undefined") return "";
+  for (const m of candidates) {
+    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch (_) {}
+  }
+  return "";
+}
+
+function seekTo(t){
+  return new Promise(resolve => {
+    if (Math.abs(video.currentTime - t) < 0.002 && video.readyState >= 2) return resolve();
+    const done = () => { video.removeEventListener("seeked", done); resolve(); };
+    video.addEventListener("seeked", done);
+    try { video.currentTime = t; } catch (_) { resolve(); }
+  });
+}
+
+$("processBtn").addEventListener("click", startExport);
+
+async function startExport(){
+  if (S.exporting || !S.vw) return;
+  if (!S.regions.length) return;
+
+  const mime = pickMime();
+  if (!mime) {
+    alert(
+      "Your browser doesn't expose a video encoder to JavaScript.\n\n" +
+      "Chrome, Edge, Firefox, and Safari 16+ all work. Try one of those."
+    );
+    return;
+  }
+
+  const W = S.vw, H = S.vh;
+  const fps = 30;
+  const q = QUALITY[S.quality];
+
+  S.exporting = true;
+  video.pause();
+  setPlayIcon(false);
+
+  $("processBtn").disabled = true;
+  $("clearBtn").disabled = true;
+  $("resultPanel").hidden = true;
+  $("progressWrap").hidden = false;
+  $("progressText").textContent = "Preparing encoder";
+  $("progressBar").style.width = "0%";
+  $("progressPct").textContent = "0%";
+
+  // Size the export canvas
+  out.width = W;
+  out.height = H;
+  octx.clearRect(0, 0, W, H);
+
+  // Rewind
+  await seekTo(0);
+
+  // Build the stream
+  let stream;
+  try {
+    stream = out.captureStream(fps);
+  } catch (e) {
+    alert("Couldn't capture the canvas: " + e.message);
+    finishExport();
+    return;
+  }
+
+  if (mediaDest && mediaDest.stream.getAudioTracks().length) {
+    mediaDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+  }
+
+  const bitrate = Math.min(24_000_000, Math.max(6_000_000, Math.round(W * H * fps * 0.15)));
+
+  let recorder;
+  try {
+    recorder = new MediaRecorder(stream, {
+      mimeType: mime,
+      videoBitsPerSecond: bitrate,
+      audioBitsPerSecond: 128000
+    });
+  } catch (e) {
+    // Retry without explicit bitrate
+    try {
+      recorder = new MediaRecorder(stream, { mimeType: mime });
+    } catch (e2) {
+      alert("Recorder could not start: " + e2.message);
+      finishExport();
+      return;
+    }
+  }
+
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  recorder.onerror = e => {
+    console.error(e);
+    $("progressText").textContent = "Encoder error — try a shorter clip or lower resolution";
+  };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mime.split(";")[0] });
+    showResult(blob, mime);
+  };
+
+  // Silence playback while recording
+  if (gainNode) gainNode.gain.value = 0;
+
+  // Render loop
+  let stopped = false;
+  const drawExportFrame = () => {
+    if (stopped) return;
+    if (video.readyState >= 2) {
+      octx.drawImage(video, 0, 0, W, H);
+      for (const r of S.regions) {
+        inpaintRegion(octx, W, H, r, S.feather, q);
+      }
+    }
+    requestAnimationFrame(drawExportFrame);
+  };
+
+  const onEnded = () => {
+    stopped = true;
+    video.removeEventListener("ended", onEnded);
+    // Give the encoder a moment to flush the final frames.
+    setTimeout(() => {
+      try { recorder.stop(); } catch (_) {}
+    }, 450);
+  };
+
+  video.addEventListener("ended", onEnded);
+
+  // Progress
+  const progressTimer = setInterval(() => {
+    if (!S.duration) return;
+    const p = clamp(video.currentTime / S.duration, 0, 1);
+    $("progressBar").style.width = (p * 100).toFixed(1) + "%";
+    $("progressPct").textContent = Math.round(p * 100) + "%";
+    $("progressText").textContent = "Removing watermarks · " + fmtTime(video.currentTime) + " / " + fmtTime(S.duration);
+  }, 200);
+
+  // Store cleanup hooks
+  S._exportCleanup = () => {
+    clearInterval(progressTimer);
+    stopped = true;
+    video.removeEventListener("ended", onEnded);
+    if (gainNode) gainNode.gain.value = 1;
+    try { video.pause(); } catch (_) {}
+  };
+
+  recorder.start(1000);
+
+  try {
+    if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+    await video.play();
+    requestAnimationFrame(drawExportFrame);
+  } catch (e) {
+    alert("Playback failed during export: " + e.message);
+    try { recorder.stop(); } catch (_) {}
+    finishExport();
+  }
+}
+
+function finishExport(){
+  if (S._exportCleanup) { S._exportCleanup(); S._exportCleanup = null; }
+  S.exporting = false;
+  $("progressWrap").hidden = true;
+  renderRegions();
+}
+
+function showResult(blob, mime){
+  if (S._exportCleanup) { S._exportCleanup(); S._exportCleanup = null; }
+  S.exporting = false;
+  $("progressWrap").hidden = true;
+  renderRegions();
+
+  if (!blob.size) {
+    $("progressWrap").hidden = false;
+    $("progressText").textContent = "No data was recorded — try a shorter clip.";
+    return;
+  }
+
+  const ext = mime.includes("mp4") ? "mp4" : "webm";
+  const url = URL.createObjectURL(blob);
+
+  const rv = $("resultVideo");
+  rv.src = url;
+
+  const base = S.name.replace(/\.[^.]+$/, "") || "video";
+  const a = $("downloadBtn");
+  a.href = url;
+  a.download = base + "-clean." + ext;
+
+  $("resultMeta").textContent = fmtBytes(blob.size) + " · " + ext.toUpperCase();
+
+  const smooth = S.regions.every(r => (r.w * S.vw) * (r.h * S.vh) < 400000);
+  $("resultNote").textContent = smooth
+    ? "Repaired areas were reconstructed from surrounding pixels. Check the result at full size before publishing."
+    : "Large regions were repaired — inspect closely, and consider splitting a big watermark into smaller boxes for a cleaner result.";
+
+  $("resultPanel").hidden = false;
+  $("resultPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* ============================================================
+   13. Boot
+   ============================================================ */
+$("featherVal").textContent = $("feather").value + " px";
+
+})();
+</script>
+</body>
+</html>
