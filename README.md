@@ -33,7 +33,7 @@ Every other watermark remover either charges you, caps your clip at ten seconds,
 
 - **Best on smooth backgrounds** — sky, walls, gradients, shallow depth-of-field. On busy or high-detail backgrounds you'll see some softening or smearing, because the algorithm is reconstructing detail that isn't there.
 - **Static watermarks only** — if the watermark drifts across the frame, you'd need keyframing, which isn't supported yet.
-- **Real-time export** — browser encoding runs against the wall clock, so a two-minute video takes about two minutes to export. Faster-than-realtime export via the WebCodecs API is on the roadmap.
+- **Real-time export** — the export plays the clip through once while capturing frames. On Chrome and Edge, frames are encoded via the WebCodecs API with exact source timestamps, so the output preserves the source's frame timing. Firefox and Safari fall back to MediaRecorder to keep the audio track.
 - **Output format depends on your browser** — usually MP4 (H.264) in Chrome and Safari, WebM (VP9) in Firefox.
 
 ## Browser support
