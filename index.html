@@ -1,4 +1,4 @@
-<!doctype html>
+      const pi = (y * rw + x) * 4;<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1647,6 +1647,9 @@ function inpaintRegion(ctx, W, H, region, feather, q){
       srcData[pi + 2] += (bb - srcData[pi + 2]) * a;
     }
   }
+
+  ctx.putImageData(img, x0, y0);
+}
 
 /* ============================================================
    12. Export
