@@ -1658,7 +1658,7 @@ async function startExport(){
   }
 
   const W = S.vw, H = S.vh;
-  const fps = 30;
+  const fps = 60;
   const q = QUALITY[S.quality];
 
   S.exporting = true;
@@ -1695,7 +1695,7 @@ async function startExport(){
     mediaDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
   }
 
-  const bitrate = Math.min(24_000_000, Math.max(6_000_000, Math.round(W * H * fps * 0.15)));
+  const bitrate = Math.min(40_000_000, Math.max(10_000_000, Math.round(W * H * fps * 0.25)));
 
   let recorder;
   try {
@@ -1739,7 +1739,11 @@ async function startExport(){
         inpaintRegion(octx, W, H, r, S.feather, q);
       }
     }
-    requestAnimationFrame(drawExportFrame);
+    if ("requestVideoFrameCallback" in video) {
+      video.requestVideoFrameCallback(drawExportFrame);
+    } else {
+      requestAnimationFrame(drawExportFrame);
+    }
   };
 
   const onEnded = () => {
@@ -1776,7 +1780,11 @@ async function startExport(){
   try {
     if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
     await video.play();
-    requestAnimationFrame(drawExportFrame);
+    if ("requestVideoFrameCallback" in video) {
+      video.requestVideoFrameCallback(drawExportFrame);
+    } else {
+      requestAnimationFrame(drawExportFrame);
+    }
   } catch (e) {
     alert("Playback failed during export: " + e.message);
     try { recorder.stop(); } catch (_) {}
