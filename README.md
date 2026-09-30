@@ -67,7 +67,7 @@ The site is a static HTML file, so it deploys anywhere.
 1. Push your `index.html` to the `main` branch.
 2. Go to your repo Settings, then Pages.
 3. Set Source to "Deploy from a branch" and pick `main` with the `/ (root)` folder.
-4. Save. Your site goes live at `https://oogaboogapooga.github.io/Unwatermark/` within a minute or two.
+4. Save. Your site goes live at `https://<yourgithubname>.github.io/Unwatermark/` within a minute or two.
 
 **Netlify**
 
