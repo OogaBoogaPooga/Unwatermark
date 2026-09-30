@@ -329,7 +329,11 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 
 /* --- result --- */
 .result{border-top:1px solid var(--border); padding:14px; background:var(--surface-2)}
-#resultVideo{width:100%; border-radius:var(--r); background:#000; display:block}
+#resultVideo{
+  display:block; background:#000; border-radius:var(--r);
+  max-width:100%; max-height:440px; margin:0 auto;
+  width:auto; height:auto;
+}
 .result-row{display:flex; align-items:center; gap:12px; margin-top:13px; flex-wrap:wrap}
 .result-note{font-size:12.5px; color:var(--text-3); flex:1; min-width:200px}
 
@@ -1546,9 +1550,106 @@ function inpaintRegion(ctx, W, H, region, feather, q){
 
   let img;
   try { img = ctx.getImageData(x0, y0, rw, rh); }
-  catch (_) { return; }   // tainted canvas or OOM — skip silently
+  catch (_) { return; }
 
-  const data = img.data;
+  const srcData = img.data;
+
+  // Solve at a reduced resolution so large regions stay real-time.
+  const MAX_DIM = 220;
+  const scale = Math.min(1, MAX_DIM / Math.max(rw, rh));
+  const sw = Math.max(6, Math.round(rw * scale));
+  const sh = Math.max(6, Math.round(rh * scale));
+
+  const rgb  = new Float32Array(sw * sh * 3);
+  const mask = new Uint8Array(sw * sh);
+
+  const sxr = sw / rw, syr = sh / rh;
+
+  // Box-downsample into the solver buffer.
+  for (let y = 0; y < sh; y++) {
+    const ay = Math.floor(y / syr);
+    const by = Math.min(rh, Math.max(ay + 1, Math.floor((y + 1) / syr)));
+    for (let x = 0; x < sw; x++) {
+      const ax = Math.floor(x / sxr);
+      const bx = Math.min(rw, Math.max(ax + 1, Math.floor((x + 1) / sxr)));
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let yy = ay; yy < by; yy++) {
+        for (let xx = ax; xx < bx; xx++) {
+          const pi = (yy * rw + xx) * 4;
+          r += srcData[pi]; g += srcData[pi+1]; b += srcData[pi+2]; n++;
+        }
+      }
+      if (n) {
+        const di = (y * sw + x) * 3;
+        rgb[di] = r/n; rgb[di+1] = g/n; rgb[di+2] = b/n;
+      }
+    }
+  }
+
+  // Mask, in scaled coordinates.
+  const smx0 = Math.max(0, Math.floor((fx0 - fe - x0) * sxr));
+  const smy0 = Math.max(0, Math.floor((fy0 - fe - y0) * syr));
+  const smx1 = Math.min(sw, Math.ceil((fx1 + fe - x0) * sxr));
+  const smy1 = Math.min(sh, Math.ceil((fy1 + fe - y0) * syr));
+  for (let y = smy0; y < smy1; y++) {
+    const row = y * sw;
+    for (let x = smx0; x < smx1; x++) mask[row + x] = 1;
+  }
+
+  solveInpaint(rgb, mask, sw, sh, q);
+
+  // Composite back at full resolution, bilinear-sampling the solved patch.
+  const lfx0 = fx0 - x0, lfy0 = fy0 - y0;
+  const lfx1 = fx1 - x0, lfy1 = fy1 - y0;
+  const hardEdge = fe < 0.5;
+
+  for (let y = 0; y < rh; y++) {
+    const sy = y * syr;
+    const smyi = Math.min(sh - 1, Math.floor(sy));
+    const wy = sy - smyi;
+    const smyi1 = Math.min(sh - 1, smyi + 1);
+    const dy = Math.max(lfy0 - y, 0, y - (lfy1 - 1));
+
+    for (let x = 0; x < rw; x++) {
+      const sx = x * sxr;
+      const smxi = Math.min(sw - 1, Math.floor(sx));
+      if (!mask[smyi * sw + smxi]) continue;
+
+      const wx = sx - smxi;
+      const smxi1 = Math.min(sw - 1, smxi + 1);
+      const i00 = (smyi * sw + smxi) * 3;
+      const i10 = (smyi * sw + smxi1) * 3;
+      const i01 = (smyi1 * sw + smxi) * 3;
+      const i11 = (smyi1 * sw + smxi1) * 3;
+
+      let rr = 0, gg = 0, bb = 0;
+      for (let c = 0; c < 3; c++) {
+        const t = rgb[i00+c] + (rgb[i10+c] - rgb[i00+c]) * wx;
+        const b2 = rgb[i01+c] + (rgb[i11+c] - rgb[i01+c]) * wx;
+        const v = t + (b2 - t) * wy;
+        if (c === 0) rr = v; else if (c === 1) gg = v; else bb = v;
+      }
+
+      const dx = Math.max(lfx0 - x, 0, x - (lfx1 - 1));
+      let a;
+      if (dx <= 0 && dy <= 0) a = 1;
+      else if (hardEdge) a = 1;
+      else {
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d >= fe) continue;
+        const t = 1 - d / fe;
+        a = t * t * (3 - 2 * t);
+      }
+
+      const pi = (y * rw + x) * 4;
+      srcData[pi]     += (rr - srcData[pi])     * a;
+      srcData[pi + 1] += (gg - srcData[pi + 1]) * a;
+      srcData[pi + 2] += (bb - srcData[pi + 2]) * a;
+    }
+  }
+
+  ctx.putImageData(img, x0, y0);
+}
 
   // --- Mask: the selection expanded by the feather width ---
   const mx0 = Math.max(0, fx0 - fe - x0);
@@ -1658,7 +1759,7 @@ async function startExport(){
   }
 
   const W = S.vw, H = S.vh;
-  const fps = 60;
+  const fps = 30;
   const q = QUALITY[S.quality];
 
   S.exporting = true;
@@ -1695,7 +1796,7 @@ async function startExport(){
     mediaDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
   }
 
-  const bitrate = Math.min(40_000_000, Math.max(10_000_000, Math.round(W * H * fps * 0.25)));
+  const bitrate = Math.min(15_000_000, Math.max(6_000_000, Math.round(W * H * fps * 0.18)));
 
   let recorder;
   try {
