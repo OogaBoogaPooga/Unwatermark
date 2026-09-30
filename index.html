@@ -9,81 +9,59 @@
 <meta property="og:title" content="Unwatermark — free video watermark remover">
 <meta property="og:description" content="Runs entirely on your device. No uploads, no accounts, no limits.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://unwatermark.eu.org/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://unwatermark.eu.org/preview.png">
+<link rel="canonical" href="https://unwatermark.eu.org/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a0a0b'/><path d='M8 22V10h3.4l4.6 8 4.6-8H24v12h-3v-7l-3.6 6.2h-1.8L12 15v7z' fill='%23fff'/></svg>">
 
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem("uw-theme");
+    var prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+    document.documentElement.dataset.theme = saved || (prefersLight ? "light" : "dark");
+  }catch(e){
+    document.documentElement.dataset.theme = "dark";
+  }
+})();
+</script>
+
 <style>
-/* ============================================================
-   Design tokens
-   ============================================================ */
 :root{
-  --bg:#0a0a0b;
-  --surface:#111113;
-  --surface-2:#17171a;
-  --surface-3:#1d1d21;
-  --border:#252529;
-  --border-2:#33333a;
-  --text:#f2f2f4;
-  --text-2:#a1a1ab;
-  --text-3:#6d6d78;
-  --accent:#ffffff;
-  --good:#4ade80;
-  --good-dim:#16a34a;
-  --warn:#fbbf24;
-  --danger:#f87171;
-  --focus:#5b9dff;
-
-  --r-sm:6px;
-  --r:9px;
-  --r-lg:14px;
-
+  --bg:#0a0a0b;--surface:#111113;--surface-2:#17171a;--surface-3:#1d1d21;
+  --border:#252529;--border-2:#33333a;
+  --text:#f2f2f4;--text-2:#a1a1ab;--text-3:#6d6d78;
+  --accent:#ffffff;--good:#4ade80;--good-dim:#16a34a;
+  --warn:#fbbf24;--danger:#f87171;--focus:#5b9dff;
+  --r-sm:6px;--r:9px;--r-lg:14px;
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-
   --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px -12px rgba(0,0,0,.6);
 }
-
 html[data-theme="light"]{
-  --bg:#fbfbfc;
-  --surface:#ffffff;
-  --surface-2:#f5f5f7;
-  --surface-3:#eeeef1;
-  --border:#e5e5ea;
-  --border-2:#d4d4dc;
-  --text:#0d0d10;
-  --text-2:#585863;
-  --text-3:#8b8b96;
-  --accent:#0d0d10;
+  --bg:#fbfbfc;--surface:#ffffff;--surface-2:#f5f5f7;--surface-3:#eeeef1;
+  --border:#e5e5ea;--border-2:#d4d4dc;
+  --text:#0d0d10;--text-2:#585863;--text-3:#8b8b96;--accent:#0d0d10;
   --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px -14px rgba(0,0,0,.18);
 }
-
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
 body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font);
-  font-size:15px;
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
+  font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   text-rendering:optimizeLegibility;
 }
 ::selection{background:rgba(120,170,255,.28)}
-
 h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.021em; line-height:1.15}
 p{margin:0}
 a{color:inherit; text-decoration:none}
 button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 svg{display:block; flex:none}
 :focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px}
-
 .mono{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:.92em}
 .wrap{max-width:1080px; margin:0 auto; padding:0 22px}
-
-/* ============================================================
-   Header
-   ============================================================ */
 .nav{
   position:sticky; top:0; z-index:50;
   background:color-mix(in srgb, var(--bg) 82%, transparent);
@@ -110,15 +88,10 @@ svg{display:block; flex:none}
 }
 .icon-btn:hover{color:var(--text); background:var(--surface-2)}
 @media (max-width:640px){ .nav-links a.hide-sm{display:none} }
-
-/* ============================================================
-   Hero
-   ============================================================ */
 .hero{padding:74px 0 34px; text-align:center}
 .hero h1{
   font-size:clamp(30px, 5.4vw, 50px);
-  letter-spacing:-.033em;
-  line-height:1.06;
+  letter-spacing:-.033em;line-height:1.06;
   max-width:15ch; margin:0 auto;
 }
 .hero h1 em{font-style:normal; color:var(--text-3)}
@@ -135,10 +108,6 @@ svg{display:block; flex:none}
   font-size:12.5px; color:var(--text-2); letter-spacing:.005em;
 }
 .pill svg{opacity:.7}
-
-/* ============================================================
-   Tool shell
-   ============================================================ */
 .tool{margin:34px 0 0}
 .panel{
   background:var(--surface);
@@ -146,8 +115,6 @@ svg{display:block; flex:none}
   border-radius:var(--r-lg);
   overflow:hidden;
 }
-
-/* --- dropzone --- */
 .dropzone{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:14px; padding:78px 24px; text-align:center; cursor:pointer;
@@ -170,8 +137,6 @@ svg{display:block; flex:none}
   transition:opacity .12s;
 }
 .dz-btn:hover{opacity:.86}
-
-/* --- workspace --- */
 .ws-bar{
   display:flex; align-items:center; gap:12px;
   padding:11px 14px; border-bottom:1px solid var(--border);
@@ -185,27 +150,18 @@ svg{display:block; flex:none}
 }
 .ws-meta{font-size:12px; color:var(--text-3); white-space:nowrap}
 @media (max-width:640px){ .ws-meta{display:none} }
-
 .stage{
   position:relative; background:#000; display:flex; justify-content:center; align-items:center;
   min-height:180px; padding:0; overflow:hidden;
 }
 #preview{display:block; max-width:100%; height:auto; touch-action:none; cursor:crosshair}
-.stage-empty{
-  color:var(--text-3); font-size:13px; padding:60px 20px; text-align:center;
-}
-
-/* --- transport --- */
 .transport{padding:12px 14px; border-top:1px solid var(--border); background:var(--surface-2)}
-.scrub{
-  position:relative; height:22px; display:flex; align-items:center; cursor:pointer;
-  touch-action:none;
-}
-.scrub-track{position:absolute; left:0; right:0; height:4px; border-radius:2px; background:var(--surface-3); overflow:hidden}
-.scrub-fill{position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--text-3)}
+.scrub{position:relative;height:22px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.scrub-track{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:var(--surface-3);overflow:hidden}
+.scrub-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--text-3)}
 .scrub-head{
-  position:absolute; width:12px; height:12px; border-radius:50%; background:var(--accent);
-  transform:translateX(-50%); pointer-events:none; box-shadow:0 0 0 3px var(--surface-2);
+  position:absolute;width:12px;height:12px;border-radius:50%;background:var(--accent);
+  transform:translateX(-50%);pointer-events:none;box-shadow:0 0 0 3px var(--surface-2);
   transition:transform .1s;
 }
 .scrub:hover .scrub-head{transform:translateX(-50%) scale(1.15)}
@@ -217,8 +173,6 @@ svg{display:block; flex:none}
 .t-btn:hover{color:var(--text); background:var(--surface-3)}
 .t-time{font-family:var(--mono); font-size:12.5px; color:var(--text-3); letter-spacing:-.01em}
 .t-spacer{flex:1}
-
-/* --- side / bottom controls --- */
 .controls{
   display:grid; grid-template-columns:1fr 260px; gap:0;
   border-top:1px solid var(--border);
@@ -227,7 +181,6 @@ svg{display:block; flex:none}
 .regions-pane{padding:14px; border-right:1px solid var(--border); min-height:120px}
 @media (max-width:820px){ .regions-pane{border-right:0; border-bottom:1px solid var(--border)} }
 .settings-pane{padding:14px}
-
 .label{
   font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
   color:var(--text-3); margin-bottom:10px; display:flex; align-items:center; gap:8px;
@@ -237,7 +190,6 @@ svg{display:block; flex:none}
   padding:1px 6px; font-size:10.5px; letter-spacing:0;
 }
 .empty-note{color:var(--text-3); font-size:13px; padding:10px 0}
-
 .region-item{
   display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--r-sm);
   border:1px solid var(--border); background:var(--surface-2); margin-bottom:6px;
@@ -256,13 +208,11 @@ svg{display:block; flex:none}
   transition:color .12s, background .12s;
 }
 .region-del:hover{color:var(--danger); background:var(--surface-3)}
-
 .setting{margin-bottom:14px}
 .setting:last-child{margin-bottom:0}
 .setting-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:7px}
 .setting-name{font-size:12.5px; color:var(--text-2)}
 .setting-val{font-family:var(--mono); font-size:11.5px; color:var(--text-3)}
-
 input[type=range]{
   -webkit-appearance:none; appearance:none; width:100%; height:18px; background:transparent; cursor:pointer;
 }
@@ -273,7 +223,6 @@ input[type=range]::-webkit-slider-thumb{
 }
 input[type=range]::-moz-range-track{height:3px; border-radius:2px; background:var(--surface-3)}
 input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);border:0}
-
 .seg{display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm); padding:2px; gap:2px}
 .seg button{
   flex:1; padding:5px 4px; border-radius:4px; font-size:12px; color:var(--text-3);
@@ -281,7 +230,6 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 }
 .seg button:hover{color:var(--text-2)}
 .seg button.on{background:var(--surface-3); color:var(--text); box-shadow:var(--shadow)}
-
 .switch-row{display:flex; align-items:center; justify-content:space-between; gap:12px}
 .switch{position:relative; width:34px; height:20px; flex:none}
 .switch input{position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; z-index:2}
@@ -295,8 +243,6 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 }
 .switch input:checked ~ .track{background:var(--good-dim); border-color:var(--good-dim)}
 .switch input:checked ~ .knob{transform:translateX(14px); background:#fff}
-
-/* --- action bar --- */
 .actions{
   display:flex; align-items:center; gap:10px; padding:13px 14px;
   border-top:1px solid var(--border); background:var(--surface-2);
@@ -315,19 +261,13 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .btn-good{background:var(--good); color:#052e16}
 .btn-good:hover{opacity:.88}
 .actions .spacer{flex:1}
-
-/* --- progress --- */
 .progress-wrap{padding:0 14px 14px; background:var(--surface-2)}
-.progress{
-  height:3px; border-radius:2px; background:var(--surface-3); overflow:hidden; margin-top:2px;
-}
+.progress{height:3px; border-radius:2px; background:var(--surface-3); overflow:hidden; margin-top:2px}
 .progress i{display:block; height:100%; width:0%; background:var(--good); transition:width .18s linear}
 .progress-label{
   display:flex; justify-content:space-between; font-size:12px; color:var(--text-3);
   margin-bottom:8px; font-family:var(--mono);
 }
-
-/* --- result --- */
 .result{border-top:1px solid var(--border); padding:14px; background:var(--surface-2)}
 #resultVideo{
   display:block; background:#000; border-radius:var(--r);
@@ -336,24 +276,10 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 }
 .result-row{display:flex; align-items:center; gap:12px; margin-top:13px; flex-wrap:wrap}
 .result-note{font-size:12.5px; color:var(--text-3); flex:1; min-width:200px}
-
-/* --- callout --- */
-.callout{
-  display:flex; gap:11px; padding:12px 14px; border-radius:var(--r);
-  border:1px solid var(--border); background:var(--surface-2);
-  font-size:13px; color:var(--text-2); line-height:1.55;
-}
-.callout svg{color:var(--text-3); margin-top:1px}
-.callout b{color:var(--text); font-weight:500}
-
-/* ============================================================
-   Content sections
-   ============================================================ */
 .section{padding:78px 0 0}
 .section-head{max-width:60ch; margin-bottom:34px}
 .section-head h2{font-size:clamp(21px,3vw,27px); letter-spacing:-.025em}
 .section-head p{color:var(--text-2); margin-top:11px; font-size:15px}
-
 .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
 @media (max-width:820px){ .grid3{grid-template-columns:1fr} }
 .feature{
@@ -362,7 +288,6 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .feature svg{color:var(--text-2); margin-bottom:13px}
 .feature h3{font-size:14.5px; margin-bottom:6px}
 .feature p{font-size:13.5px; color:var(--text-2); line-height:1.6}
-
 .steps{counter-reset:s; display:grid; gap:0}
 .step{
   display:grid; grid-template-columns:44px 1fr; gap:18px; padding:19px 0;
@@ -376,7 +301,6 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .step-n::before{content:"0" counter(s)}
 .step h3{font-size:14.5px; margin-bottom:5px}
 .step p{font-size:13.5px; color:var(--text-2); line-height:1.62; max-width:66ch}
-
 .faq{border-top:1px solid var(--border)}
 details{border-bottom:1px solid var(--border)}
 details summary{
@@ -392,7 +316,6 @@ details summary::after{
 details[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
 details .ans{padding:0 0 19px; color:var(--text-2); font-size:13.5px; line-height:1.68; max-width:70ch}
 details .ans a{color:var(--text); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--border-2)}
-
 footer{
   margin-top:96px; border-top:1px solid var(--border); padding:34px 0 52px;
 }
@@ -400,34 +323,17 @@ footer{
 .foot .spacer{flex:1}
 .foot a{color:var(--text-3); transition:color .12s}
 .foot a:hover{color:var(--text)}
-
-/* ============================================================
-   Off-screen media elements
-   ============================================================ */
 #srcVideo{position:fixed; left:0; bottom:0; width:2px; height:2px; opacity:.01; pointer-events:none; z-index:-1}
 #out{position:fixed; left:-10000px; top:0; pointer-events:none}
-
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-/* Social footer */
-.credits{
-  display:flex; align-items:center; gap:7px;
-  font-size:13px; color:var(--text-3);
-}
-.social-link{
-  display:inline-flex; align-items:center; gap:6px;
-  color:var(--text-3); transition:color .15s;
-}
+.credits{display:flex; align-items:center; gap:7px; font-size:13px; color:var(--text-3)}
+.social-link{display:inline-flex; align-items:center; gap:6px; color:var(--text-3); transition:color .15s}
 .social-link:hover{color:var(--text)}
 .social-link svg{opacity:.8; transition:opacity .15s}
 .social-link:hover svg{opacity:1}
 .social-link span{font-weight:500; letter-spacing:-.01em}
-.footer-links{
-  display:flex; align-items:center; gap:18px;
-  font-size:13px; color:var(--text-3);
-}
-.footer-links a{
-  color:var(--text-3); transition:color .15s;
-}
+.footer-links{display:flex; align-items:center; gap:18px; font-size:13px; color:var(--text-3)}
+.footer-links a{color:var(--text-3); transition:color .15s}
 .footer-links a:hover{color:var(--text)}
 @media (max-width:560px){
   .foot{flex-direction:column; align-items:flex-start; gap:14px}
@@ -437,7 +343,6 @@ footer{
 </head>
 <body>
 
-<!-- ============================ HEADER ============================ -->
 <header class="nav">
   <div class="nav-inner">
     <a class="brand" href="/" aria-label="Unwatermark home">
@@ -450,7 +355,7 @@ footer{
     <nav class="nav-links">
       <a href="#how" class="hide-sm">How it works</a>
       <a href="#faq" class="hide-sm">FAQ</a>
-      <a href="https://github.com/" id="ghLink" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/OogaBoogaPooga/Unwatermark" target="_blank" rel="noopener">GitHub</a>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
           <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
@@ -462,7 +367,6 @@ footer{
 
 <main class="wrap">
 
-  <!-- ============================ HERO ============================ -->
   <section class="hero">
     <h1>Remove watermarks from video. <em>Right in your browser.</em></h1>
     <p class="lede">
@@ -486,11 +390,9 @@ footer{
     </div>
   </section>
 
-  <!-- ============================ TOOL ============================ -->
   <section class="tool">
     <div class="panel" id="panel">
 
-      <!-- Empty state -->
       <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose a video file">
         <div class="dz-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -507,7 +409,6 @@ footer{
       </div>
       <input type="file" id="fileInput" accept="video/*" class="sr">
 
-      <!-- Workspace -->
       <div id="workspace" hidden>
 
         <div class="ws-bar">
@@ -611,7 +512,6 @@ footer{
       </div>
     </div>
 
-    <!-- Result -->
     <div class="panel" id="resultPanel" hidden style="margin-top:14px">
       <div class="ws-bar">
         <div class="ws-file">
@@ -638,7 +538,6 @@ footer{
     </div>
   </section>
 
-  <!-- ============================ HOW ============================ -->
   <section class="section" id="how">
     <div class="section-head">
       <h2>How it actually works</h2>
@@ -671,13 +570,12 @@ footer{
         <div class="step-n"></div>
         <div>
           <h3>Frames are re-encoded locally</h3>
-          <p>Every processed frame is drawn to a canvas and captured by the browser's own encoder. Nothing is transmitted. When it's done, you get a file back.</p>
+          <p>Every processed frame is timestamped and encoded by the browser's raw video encoder, so the output has the exact same frame timing as the source. Nothing is transmitted. When it's done, you get a file back.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================ WHY ============================ -->
   <section class="section">
     <div class="section-head">
       <h2>Why this one is different</h2>
@@ -707,7 +605,6 @@ footer{
     </div>
   </section>
 
-  <!-- ============================ FAQ ============================ -->
   <section class="section" id="faq">
     <div class="section-head">
       <h2>Questions</h2>
@@ -731,11 +628,11 @@ footer{
       </details>
       <details>
         <summary>Why does exporting take as long as the video itself?</summary>
-        <div class="ans">Browser video encoding through <code class="mono">MediaRecorder</code> runs against the wall clock, so the clip plays through once while frames are captured. A two-minute video takes about two minutes. Faster-than-realtime export is possible with the WebCodecs API and is on the roadmap.</div>
+        <div class="ans">We play the clip through once while capturing each frame. Real-time processing is the trade-off for keeping everything local — there's no server to do it faster. The output preserves every frame with exact timing, so the result plays back perfectly smoothly.</div>
       </details>
       <details>
         <summary>What format do I get back?</summary>
-        <div class="ans">Whichever your browser can encode best — usually MP4 (H.264) in Chrome and Safari, WebM (VP9) in Firefox. Audio is preserved where the browser allows it. Output bitrate is scaled to resolution automatically.</div>
+        <div class="ans">WebM (VP9 video + Opus audio). It plays in every modern browser, VLC, Windows Media Player, and can be uploaded to YouTube, Twitter, Reddit, and Discord without conversion. If you need MP4 specifically, run it through any free converter like HandBrake.</div>
       </details>
       <details>
         <summary>Is this legal to use?</summary>
@@ -771,7 +668,6 @@ footer{
   </div>
 </footer>
 
-<!-- Off-screen media -->
 <video id="srcVideo" playsinline preload="auto" crossorigin="anonymous"></video>
 <canvas id="out"></canvas>
 
@@ -779,9 +675,6 @@ footer{
 "use strict";
 (() => {
 
-/* ============================================================
-   0. Small helpers
-   ============================================================ */
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
@@ -797,23 +690,22 @@ function fmtBytes(b){
   return (b / 1073741824).toFixed(2) + " GB";
 }
 
-/* ============================================================
-   1. Theme
-   ============================================================ */
-(function theme(){
-  const saved = localStorage.getItem("uw-theme");
-  const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-  document.documentElement.dataset.theme = saved || (prefersLight ? "light" : "dark");
-  $("themeBtn").addEventListener("click", () => {
-    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem("uw-theme", next);
-  });
+$("themeBtn").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("uw-theme", next);
+});
+
+// Preload the muxer library as soon as the page loads so export is instant.
+let MuxerLib = null;
+(async () => {
+  try {
+    MuxerLib = await import("https://cdn.jsdelivr.net/npm/webm-muxer@5/+esm");
+  } catch (e) {
+    console.warn("Muxer preload failed (will retry on export):", e);
+  }
 })();
 
-/* ============================================================
-   2. State
-   ============================================================ */
 const video    = $("srcVideo");
 const preview  = $("preview");
 const pctx     = preview.getContext("2d");
@@ -822,10 +714,11 @@ const octx     = out.getContext("2d", { willReadFrequently: true });
 
 const S = {
   url: null,
+  _resultURL: null,
   name: "",
   vw: 0, vh: 0,
   duration: 0,
-  regions: [],        // { x, y, w, h }  — all normalised 0..1
+  regions: [],
   selected: -1,
   quality: "normal",
   feather: 3,
@@ -842,14 +735,6 @@ const QUALITY = {
   high:   { coarse: 170, fine: 9 },
 };
 
-/* ============================================================
-   3. Audio graph
-   ------------------------------------------------------------
-   Element audio is routed into a MediaStreamDestination for the
-   recorder, and separately through a gain node to the speakers.
-   During export the gain is dropped to zero so the render is
-   silent while still carrying an audio track.
-   ============================================================ */
 let audioCtx = null, gainNode = null, mediaDest = null, audioReady = false;
 
 function initAudio(){
@@ -868,9 +753,6 @@ function initAudio(){
   }
 }
 
-/* ============================================================
-   4. File loading
-   ============================================================ */
 const dropzone  = $("dropzone");
 const fileInput = $("fileInput");
 
@@ -965,9 +847,6 @@ $("againBtn").addEventListener("click", () => {
   window.scrollTo({ top: $("panel").offsetTop - 80, behavior: "smooth" });
 });
 
-/* ============================================================
-   5. Preview sizing
-   ============================================================ */
 function sizePreview(){
   const stage = $("stage");
   const avail = Math.max(280, stage.clientWidth || 900);
@@ -992,9 +871,6 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(sizePreview, 140);
 });
 
-/* ============================================================
-   6. Render loop
-   ============================================================ */
 function startLoop(){
   stopLoop();
   const loop = () => {
@@ -1010,13 +886,13 @@ function stopLoop(){
 
 function drawFrame(){
   if (!S.vw || video.readyState < 2) return;
+  if (S.exporting) return;
 
   const W = preview.width, H = preview.height;
   pctx.drawImage(video, 0, 0, W, H);
 
   const t0 = performance.now();
 
-  // Live inpainting preview
   if (S.live && S.regions.length) {
     const q = S.playing ? QUALITY.fast : QUALITY[S.quality];
     for (const r of S.regions) {
@@ -1028,7 +904,6 @@ function drawFrame(){
 
   S.lastFrameCost = S.lastFrameCost * 0.85 + (performance.now() - t0) * 0.15;
 
-  // Timeline
   if (S.duration > 0) {
     const p = clamp(video.currentTime / S.duration, 0, 1) * 100;
     $("scrubFill").style.width = p + "%";
@@ -1042,7 +917,6 @@ function drawOverlay(){
   const W = preview.width, H = preview.height;
 
   if (S.regions.length) {
-    // Dim everything outside the union of regions (even-odd fill)
     pctx.save();
     pctx.beginPath();
     pctx.rect(0, 0, W, H);
@@ -1088,9 +962,6 @@ function drawOverlay(){
   });
 }
 
-/* ============================================================
-   7. Region interaction
-   ============================================================ */
 let drag = null;
 
 function canvasPoint(e){
@@ -1102,9 +973,8 @@ function canvasPoint(e){
 }
 
 function hitTest(p){
-  const HANDLE = 0.014; // normalised handle radius
+  const HANDLE = 0.014;
 
-  // Selected region handles first
   if (S.selected >= 0 && S.selected < S.regions.length) {
     const r = S.regions[S.selected];
     const corners = {
@@ -1121,7 +991,6 @@ function hitTest(p){
     }
   }
 
-  // Region bodies — topmost first
   for (let i = S.regions.length - 1; i >= 0; i--) {
     const r = S.regions[i];
     if (p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h) {
@@ -1160,7 +1029,6 @@ preview.addEventListener("pointermove", e => {
   if (drag.type === "create") {
     const x = Math.min(drag.ax, p.x), y = Math.min(drag.ay, p.y);
     const w = Math.abs(p.x - drag.ax), h = Math.abs(p.y - drag.ay);
-    // Live-create: keep it as a provisional region
     if (w > 0.012 && h > 0.012) {
       if (S.regions.length && drag.provisional) {
         S.regions[S.regions.length - 1] = { x, y, w, h };
@@ -1199,7 +1067,6 @@ function endDrag(e){
   if (!drag) return;
   try { preview.releasePointerCapture(e.pointerId); } catch (_) {}
   if (drag.type === "create" && !drag.provisional) {
-    // Click without a drag — treat as deselect
     S.selected = -1;
   }
   drag = null;
@@ -1208,9 +1075,6 @@ function endDrag(e){
 preview.addEventListener("pointerup", endDrag);
 preview.addEventListener("pointercancel", endDrag);
 
-/* ============================================================
-   8. Region list UI
-   ============================================================ */
 function renderRegions(){
   const list  = $("regionList");
   const count = $("regionCount");
@@ -1219,7 +1083,6 @@ function renderRegions(){
   count.textContent = S.regions.length;
   empty.hidden = S.regions.length > 0;
 
-  // Rebuild list
   list.textContent = "";
   S.regions.forEach((r, i) => {
     const px = Math.round(r.w * S.vw), py = Math.round(r.h * S.vh);
@@ -1274,9 +1137,6 @@ $("clearBtn").addEventListener("click", () => {
   renderRegions();
 });
 
-/* ============================================================
-   9. Settings UI
-   ============================================================ */
 $("feather").addEventListener("input", e => {
   S.feather = +e.target.value;
   $("featherVal").textContent = S.feather + " px";
@@ -1293,9 +1153,6 @@ $("livePreview").addEventListener("change", e => {
   S.live = e.target.checked;
 });
 
-/* ============================================================
-   10. Transport
-   ============================================================ */
 $("playBtn").addEventListener("click", togglePlay);
 
 function togglePlay(){
@@ -1319,7 +1176,6 @@ function setPlayIcon(playing){
   $("playBtn").setAttribute("aria-label", playing ? "Pause" : "Play");
 }
 
-/* Scrubbing */
 const scrub = $("scrub");
 let scrubbing = false;
 
@@ -1341,13 +1197,16 @@ scrub.addEventListener("pointerup", e => {
   scrubbing = false;
   try { scrub.releasePointerCapture(e.pointerId); } catch (_) {}
 });
+scrub.addEventListener("pointercancel", e => {
+  scrubbing = false;
+  try { scrub.releasePointerCapture(e.pointerId); } catch (_) {}
+});
 scrub.addEventListener("keydown", e => {
   if (!S.duration) return;
   if (e.key === "ArrowRight") { e.preventDefault(); video.currentTime = clamp(video.currentTime + 1, 0, S.duration); }
   if (e.key === "ArrowLeft")  { e.preventDefault(); video.currentTime = clamp(video.currentTime - 1, 0, S.duration); }
 });
 
-/* Keyboard shortcuts */
 document.addEventListener("keydown", e => {
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
@@ -1375,21 +1234,7 @@ document.addEventListener("keydown", e => {
 });
 
 /* ============================================================
-   11. THE INPAINTING CORE
-   ------------------------------------------------------------
-   Multiscale diffusion. The hole is filled by solving Laplace's
-   equation with Dirichlet boundary conditions, using a coarse-to-
-   fine pyramid so low frequencies converge in a handful of passes
-   rather than thousands.
-
-   Steps:
-     1. Build a pyramid. Each coarser pixel averages whichever of
-        its four children are "known"; a coarse pixel is a hole
-        only if all four children are holes.
-     2. Solve the coarsest level with many Gauss-Seidel sweeps.
-     3. Upsample into the level below (writing only into holes),
-        then run a few refinement sweeps. Repeat down to full res.
-     4. Composite the repaired pixels back with a feathered alpha.
+   INPAINTING CORE
    ============================================================ */
 
 function buildPyramid(rgb, mask, w, h){
@@ -1405,7 +1250,6 @@ function buildPyramid(rgb, mask, w, h){
     for (let y = 0; y < nh; y++) {
       for (let x = 0; x < nw; x++) {
         let r = 0, g = 0, b = 0, n = 0;
-
         for (let dy = 0; dy < 2; dy++) {
           const sy = (y << 1) + dy;
           if (sy >= ch) break;
@@ -1420,7 +1264,6 @@ function buildPyramid(rgb, mask, w, h){
             n++;
           }
         }
-
         const di = y * nw + x;
         if (n > 0) {
           nrgb[di * 3]     = r / n;
@@ -1441,7 +1284,6 @@ function buildPyramid(rgb, mask, w, h){
 
 function diffuse(level, iterations){
   const { rgb, mask, w, h } = level;
-
   for (let it = 0; it < iterations; it++) {
     for (let y = 0; y < h; y++) {
       const row = y * w;
@@ -1450,7 +1292,6 @@ function diffuse(level, iterations){
         if (!mask[i]) continue;
 
         let r = 0, g = 0, b = 0, n = 0;
-
         if (x > 0)     { const j = (i - 1) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
         if (x < w - 1) { const j = (i + 1) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
         if (y > 0)     { const j = (i - w) * 3; r += rgb[j];   g += rgb[j+1]; b += rgb[j+2]; n++; }
@@ -1473,7 +1314,6 @@ function upsampleInto(src, sw, sh, dst, dw, dh, dmask){
     let y0 = Math.floor(fy);
     const wy = fy - y0;
     let y1 = y0 + 1;
-
     if (y0 < 0) y0 = 0;
     if (y1 < 0) y1 = 0;
     if (y0 > sh - 1) y0 = sh - 1;
@@ -1490,7 +1330,6 @@ function upsampleInto(src, sw, sh, dst, dw, dh, dmask){
       let x0 = Math.floor(fx);
       const wx = fx - x0;
       let x1 = x0 + 1;
-
       if (x0 < 0) x0 = 0;
       if (x1 < 0) x1 = 0;
       if (x0 > sw - 1) x0 = sw - 1;
@@ -1511,11 +1350,8 @@ function upsampleInto(src, sw, sh, dst, dw, dh, dmask){
 
 function solveInpaint(rgb, mask, w, h, q){
   const levels = buildPyramid(rgb, mask, w, h);
-
-  // Coarsest level: solve properly.
   diffuse(levels[levels.length - 1], q.coarse);
 
-  // Refine downward.
   for (let l = levels.length - 2; l >= 0; l--) {
     const fine   = levels[l];
     const coarse = levels[l + 1];
@@ -1523,14 +1359,9 @@ function solveInpaint(rgb, mask, w, h, q){
     diffuse(fine, q.fine);
   }
 
-  return rgb; // levels[0].rgb is the same reference
+  return rgb;
 }
 
-/* ------------------------------------------------------------
-   inpaintRegion — works on any 2D context.
-   region: { x, y, w, h } normalised
-   feather: blend width in canvas pixels
-   ------------------------------------------------------------ */
 function inpaintRegion(ctx, W, H, region, feather, q){
   const fx0 = region.x * W;
   const fy0 = region.y * H;
@@ -1554,8 +1385,7 @@ function inpaintRegion(ctx, W, H, region, feather, q){
 
   const srcData = img.data;
 
-  // Solve at a reduced resolution so large regions stay real-time.
-  const MAX_DIM = 220;
+  const MAX_DIM = 140;
   const scale = Math.min(1, MAX_DIM / Math.max(rw, rh));
   const sw = Math.max(6, Math.round(rw * scale));
   const sh = Math.max(6, Math.round(rh * scale));
@@ -1565,7 +1395,6 @@ function inpaintRegion(ctx, W, H, region, feather, q){
 
   const sxr = sw / rw, syr = sh / rh;
 
-  // Box-downsample into the solver buffer.
   for (let y = 0; y < sh; y++) {
     const ay = Math.floor(y / syr);
     const by = Math.min(rh, Math.max(ay + 1, Math.floor((y + 1) / syr)));
@@ -1586,7 +1415,6 @@ function inpaintRegion(ctx, W, H, region, feather, q){
     }
   }
 
-  // Mask, in scaled coordinates.
   const smx0 = Math.max(0, Math.floor((fx0 - fe - x0) * sxr));
   const smy0 = Math.max(0, Math.floor((fy0 - fe - y0) * syr));
   const smx1 = Math.min(sw, Math.ceil((fx1 + fe - x0) * sxr));
@@ -1598,7 +1426,6 @@ function inpaintRegion(ctx, W, H, region, feather, q){
 
   solveInpaint(rgb, mask, sw, sh, q);
 
-  // Composite back at full resolution, bilinear-sampling the solved patch.
   const lfx0 = fx0 - x0, lfy0 = fy0 - y0;
   const lfx1 = fx1 - x0, lfy1 = fy1 - y0;
   const hardEdge = fe < 0.5;
@@ -1652,22 +1479,8 @@ function inpaintRegion(ctx, W, H, region, feather, q){
 }
 
 /* ============================================================
-   12. Export
+   EXPORT — WebCodecs (smooth) with MediaRecorder fallback
    ============================================================ */
-function pickMime(){
-  const candidates = [
-    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
-    "video/mp4",
-    "video/webm;codecs=vp9,opus",
-    "video/webm;codecs=vp8,opus",
-    "video/webm"
-  ];
-  if (typeof MediaRecorder === "undefined") return "";
-  for (const m of candidates) {
-    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch (_) {}
-  }
-  return "";
-}
 
 function seekTo(t){
   return new Promise(resolve => {
@@ -1684,11 +1497,298 @@ async function startExport(){
   if (S.exporting || !S.vw) return;
   if (!S.regions.length) return;
 
+  const hasWC = typeof VideoEncoder !== "undefined" && typeof VideoFrame !== "undefined";
+
+  if (hasWC) {
+    try {
+      await startExportWC();
+      return;
+    } catch (e) {
+      console.warn("WebCodecs path failed, falling back to MediaRecorder:", e);
+      // Reset in case WC partially started
+      if (S._exportCleanup) { try { S._exportCleanup(); } catch(_){} S._exportCleanup = null; }
+      S.exporting = false;
+      $("progressWrap").hidden = true;
+      renderRegions();
+      if (gainNode) gainNode.gain.value = 1;
+    }
+  }
+
+  await startExportMR();
+}
+
+/* ---------- WebCodecs path ---------- */
+
+async function startExportWC(){
+  // Lazy load the muxer if preload failed
+  if (!MuxerLib) {
+    try {
+      MuxerLib = await import("https://cdn.jsdelivr.net/npm/webm-muxer@5/+esm");
+    } catch (e) {
+      throw new Error("Could not load the video muxer. Check your internet connection and try again.");
+    }
+  }
+  const { Muxer, ArrayBufferTarget } = MuxerLib;
+
+  const W = S.vw, H = S.vh;
+  const q = QUALITY[S.quality];
+  const FPS = 30;
+  const FRAME_DUR_US = Math.round(1_000_000 / FPS);
+
+  S.exporting = true;
+  video.pause();
+  setPlayIcon(false);
+
+  $("processBtn").disabled = true;
+  $("clearBtn").disabled = true;
+  $("resultPanel").hidden = true;
+  $("progressWrap").hidden = false;
+  $("progressText").textContent = "Preparing encoder";
+  $("progressBar").style.width = "0%";
+  $("progressPct").textContent = "0%";
+
+  const hasAudio = !!(mediaDest && mediaDest.stream.getAudioTracks().length);
+
+  const muxer = new Muxer({
+    target: new ArrayBufferTarget(),
+    video: { codec: "V_VP9", width: W, height: H, frameRate: FPS },
+    audio: hasAudio ? { codec: "A_OPUS", sampleRate: 48000, numberOfChannels: 2 } : undefined,
+    firstTimestampBehavior: "offset",
+  });
+
+  const videoEncoder = new VideoEncoder({
+    output: (chunk, meta) => {
+      try { muxer.addVideoChunk(chunk, meta); } catch (e) { console.error("mux video chunk:", e); }
+    },
+    error: e => {
+      console.error("Video encoder error:", e);
+      $("progressText").textContent = "Encoder error: " + e.message;
+    },
+  });
+
+  const bitrate = Math.min(20_000_000, Math.max(8_000_000, Math.round(W * H * FPS * 0.22)));
+
+  videoEncoder.configure({
+    codec: "vp09.00.10.08",
+    width: W,
+    height: H,
+    bitrate,
+    framerate: FPS,
+    latencyMode: "quality",
+  });
+
+  // Optional audio encoder
+  let audioEncoder = null;
+  let audioReader = null;
+  if (hasAudio && typeof AudioEncoder !== "undefined" && typeof MediaStreamTrackProcessor !== "undefined") {
+    try {
+      audioEncoder = new AudioEncoder({
+        output: (chunk, meta) => {
+          try { muxer.addAudioChunk(chunk, meta); } catch (e) { console.error("mux audio chunk:", e); }
+        },
+        error: e => console.warn("Audio encoder error:", e),
+      });
+      audioEncoder.configure({
+        codec: "opus",
+        sampleRate: 48000,
+        numberOfChannels: 2,
+        bitrate: 128000,
+      });
+
+      const audioTrack = mediaDest.stream.getAudioTracks()[0];
+      const processor = new MediaStreamTrackProcessor({ track: audioTrack });
+      audioReader = processor.readable.getReader();
+
+      (async () => {
+        try {
+          while (true) {
+            const { value, done } = await audioReader.read();
+            if (done) break;
+            if (value) {
+              try { audioEncoder.encode(value); } catch (_) {}
+              value.close();
+            }
+          }
+        } catch (_) { /* reader was cancelled or stream ended */ }
+      })();
+    } catch (e) {
+      console.warn("Audio setup failed, continuing without audio:", e);
+      audioEncoder = null;
+      audioReader = null;
+    }
+  }
+
+  // Prepare export canvas
+  out.width = W;
+  out.height = H;
+  octx.clearRect(0, 0, W, H);
+
+  await seekTo(0);
+  await new Promise(r => setTimeout(r, 100));
+
+  let frameIndex = 0;
+  let stopped = false;
+  let lastTs = 0;
+  let droppedFromSource = 0;
+
+  const onFrame = (_now, metadata) => {
+    if (stopped) return;
+
+    // Timestamp from the source video
+    let tsUs;
+    if (metadata && typeof metadata.mediaTime === "number") {
+      tsUs = Math.round(metadata.mediaTime * 1_000_000);
+    } else {
+      tsUs = Math.round(video.currentTime * 1_000_000);
+    }
+    if (tsUs <= lastTs) {
+      tsUs = lastTs + 1000;
+      droppedFromSource++;
+    }
+    lastTs = tsUs;
+
+    if (video.readyState >= 2) {
+      try {
+        octx.drawImage(video, 0, 0, W, H);
+        for (const r of S.regions) {
+          inpaintRegion(octx, W, H, r, S.feather, q);
+        }
+      } catch (e) {
+        console.error("Frame processing error:", e);
+      }
+    }
+
+    let frame;
+    try {
+      frame = new VideoFrame(out, {
+        timestamp: tsUs,
+        duration: FRAME_DUR_US,
+      });
+    } catch (e) {
+      console.error("VideoFrame creation failed:", e);
+      video.requestVideoFrameCallback(onFrame);
+      return;
+    }
+
+    const keyFrame = frameIndex % 60 === 0;
+    try {
+      videoEncoder.encode(frame, { keyFrame });
+    } catch (e) {
+      console.error("encode() failed:", e);
+    }
+    frame.close();
+    frameIndex++;
+
+    video.requestVideoFrameCallback(onFrame);
+  };
+
+  const originalGain = gainNode ? gainNode.gain.value : 1;
+  if (gainNode) gainNode.gain.value = 0;
+
+  const progressTimer = setInterval(() => {
+    if (!S.duration) return;
+    const p = clamp(video.currentTime / S.duration, 0, 1);
+    $("progressBar").style.width = (p * 100).toFixed(1) + "%";
+    $("progressPct").textContent = Math.round(p * 100) + "%";
+    $("progressText").textContent = "Processing · " + fmtTime(video.currentTime) + " / " + fmtTime(S.duration);
+  }, 150);
+
+  const finishUp = async () => {
+    if (stopped) return;
+    stopped = true;
+    video.removeEventListener("ended", onEnded);
+    clearInterval(progressTimer);
+
+    $("progressText").textContent = "Finalizing…";
+
+    try { await videoEncoder.flush(); } catch (e) { console.warn(e); }
+    try { videoEncoder.close(); } catch (_) {}
+
+    if (audioEncoder) {
+      try { await audioReader.cancel(); } catch (_) {}
+      try { await audioEncoder.flush(); } catch (_) {}
+      try { audioEncoder.close(); } catch (_) {}
+    }
+
+    if (gainNode) gainNode.gain.value = originalGain;
+
+    try {
+      muxer.finalize();
+    } catch (e) {
+      console.error("Muxer finalize failed:", e);
+      alert("Finalization failed: " + e.message);
+      S.exporting = false;
+      $("progressWrap").hidden = true;
+      renderRegions();
+      return;
+    }
+
+    const { buffer } = muxer.target;
+    const blob = new Blob([buffer], { type: "video/webm" });
+
+    S.exporting = false;
+    $("progressWrap").hidden = true;
+    renderRegions();
+
+    if (droppedFromSource > 0) {
+      console.log("Note: " + droppedFromSource + " frames had non-monotonic timestamps (corrected).");
+    }
+
+    if (!blob.size) {
+      $("progressWrap").hidden = false;
+      $("progressText").textContent = "No data was recorded.";
+      return;
+    }
+
+    showResult(blob, "video/webm");
+  };
+
+  const onEnded = () => { finishUp(); };
+  video.addEventListener("ended", onEnded);
+
+  try {
+    if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+    await video.play();
+    video.requestVideoFrameCallback(onFrame);
+  } catch (e) {
+    alert("Playback failed: " + e.message);
+    stopped = true;
+    clearInterval(progressTimer);
+    if (gainNode) gainNode.gain.value = originalGain;
+    try { videoEncoder.close(); } catch (_) {}
+    if (audioEncoder) {
+      try { await audioReader.cancel(); } catch (_) {}
+      try { audioEncoder.close(); } catch (_) {}
+    }
+    S.exporting = false;
+    $("progressWrap").hidden = true;
+    renderRegions();
+  }
+}
+
+/* ---------- MediaRecorder fallback (older browsers) ---------- */
+
+function pickMime(){
+  const candidates = [
+    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+    "video/mp4",
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm"
+  ];
+  if (typeof MediaRecorder === "undefined") return "";
+  for (const m of candidates) {
+    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch (_) {}
+  }
+  return "";
+}
+
+async function startExportMR(){
   const mime = pickMime();
   if (!mime) {
     alert(
-      "Your browser doesn't expose a video encoder to JavaScript.\n\n" +
-      "Chrome, Edge, Firefox, and Safari 16+ all work. Try one of those."
+      "Your browser doesn't support video encoding.\n\n" +
+      "Try Chrome, Edge, Firefox 130+, or Safari 16.4+."
     );
     return;
   }
@@ -1709,15 +1809,12 @@ async function startExport(){
   $("progressBar").style.width = "0%";
   $("progressPct").textContent = "0%";
 
-  // Size the export canvas
   out.width = W;
   out.height = H;
   octx.clearRect(0, 0, W, H);
 
-  // Rewind
   await seekTo(0);
 
-  // Build the stream
   let stream;
   try {
     stream = out.captureStream(fps);
@@ -1741,7 +1838,6 @@ async function startExport(){
       audioBitsPerSecond: 128000
     });
   } catch (e) {
-    // Retry without explicit bitrate
     try {
       recorder = new MediaRecorder(stream, { mimeType: mime });
     } catch (e2) {
@@ -1762,10 +1858,8 @@ async function startExport(){
     showResult(blob, mime);
   };
 
-  // Silence playback while recording
   if (gainNode) gainNode.gain.value = 0;
 
-  // Render loop
   let stopped = false;
   const drawExportFrame = () => {
     if (stopped) return;
@@ -1785,7 +1879,6 @@ async function startExport(){
   const onEnded = () => {
     stopped = true;
     video.removeEventListener("ended", onEnded);
-    // Give the encoder a moment to flush the final frames.
     setTimeout(() => {
       try { recorder.stop(); } catch (_) {}
     }, 450);
@@ -1793,7 +1886,6 @@ async function startExport(){
 
   video.addEventListener("ended", onEnded);
 
-  // Progress
   const progressTimer = setInterval(() => {
     if (!S.duration) return;
     const p = clamp(video.currentTime / S.duration, 0, 1);
@@ -1802,7 +1894,6 @@ async function startExport(){
     $("progressText").textContent = "Removing watermarks · " + fmtTime(video.currentTime) + " / " + fmtTime(S.duration);
   }, 200);
 
-  // Store cleanup hooks
   S._exportCleanup = () => {
     clearInterval(progressTimer);
     stopped = true;
@@ -1848,7 +1939,10 @@ function showResult(blob, mime){
   }
 
   const ext = mime.includes("mp4") ? "mp4" : "webm";
+
+  if (S._resultURL) URL.revokeObjectURL(S._resultURL);
   const url = URL.createObjectURL(blob);
+  S._resultURL = url;
 
   const rv = $("resultVideo");
   rv.src = url;
@@ -1869,9 +1963,6 @@ function showResult(blob, mime){
   $("resultPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-/* ============================================================
-   13. Boot
-   ============================================================ */
 $("featherVal").textContent = $("feather").value + " px";
 
 })();
