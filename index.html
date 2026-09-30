@@ -404,6 +404,31 @@ footer{
 #out{position:fixed; left:-10000px; top:0; pointer-events:none}
 
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* Social footer */
+.credits{
+  display:flex; align-items:center; gap:7px;
+  font-size:13px; color:var(--text-3);
+}
+.social-link{
+  display:inline-flex; align-items:center; gap:6px;
+  color:var(--text-3); transition:color .15s;
+}
+.social-link:hover{color:var(--text)}
+.social-link svg{opacity:.8; transition:opacity .15s}
+.social-link:hover svg{opacity:1}
+.social-link span{font-weight:500; letter-spacing:-.01em}
+.footer-links{
+  display:flex; align-items:center; gap:18px;
+  font-size:13px; color:var(--text-3);
+}
+.footer-links a{
+  color:var(--text-3); transition:color .15s;
+}
+.footer-links a:hover{color:var(--text)}
+@media (max-width:560px){
+  .foot{flex-direction:column; align-items:flex-start; gap:14px}
+  .footer-links{flex-wrap:wrap; gap:14px}
+}
 </style>
 </head>
 <body>
@@ -719,11 +744,26 @@ footer{
 
 <footer>
   <div class="wrap foot">
-    <span>Unwatermark — MIT licensed, no telemetry.</span>
+    <div class="credits">
+      <span>Made by</span>
+      <a href="https://www.youtube.com/@shifyee" target="_blank" rel="noopener" class="social-link" aria-label="YouTube channel">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6z"/>
+        </svg>
+        <span>shifyee</span>
+      </a>
+    </div>
     <span class="spacer"></span>
-    <a href="#how">How it works</a>
-    <a href="#faq">FAQ</a>
-    <a href="https://github.com/" id="ghLink2" target="_blank" rel="noopener">Source</a>
+    <div class="footer-links">
+      <a href="https://github.com/OogaBoogaPooga/Unwatermark" target="_blank" rel="noopener" class="social-link" aria-label="GitHub repository">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 .5C5.6.5.5 5.6.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5A11.5 11.5 0 0 0 23.5 12C23.5 5.6 18.4.5 12 .5z"/>
+        </svg>
+        <span>Source</span>
+      </a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
   </div>
 </footer>
 
