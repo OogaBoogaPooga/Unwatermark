@@ -40,17 +40,80 @@ Every other watermark remover either charges you, caps your clip at ten seconds,
 
 | Browser | Status |
 | :--- | :--- |
-| Chrome / Edge | ✅ Full support |
-| Firefox | ✅ Full support |
-| Safari 16+ | ✅ Full support |
-| Mobile browsers | ⚠️ Works, but performance depends on device |
+| Chrome / Edge | Full support |
+| Firefox | Full support |
+| Safari 16+ | Full support |
+| Mobile browsers | Works, but performance depends on device |
 
 ## Getting started locally
 
-```bash
-# Clone the repository
-git clone https://github.com/OogaBoogaPooga/Unwatermark.git
+Clone the repository:
 
-# Open the file in your browser
-cd Unwatermark
-open index.html   # or just double-click it
+    git clone https://github.com/OogaBoogaPooga/Unwatermark.git
+
+Open the file in your browser:
+
+    cd Unwatermark
+    open index.html
+
+Or just double-click `index.html`. That's it. No build step, no dependencies, no package manager. It's a single HTML file.
+
+## Deployment
+
+The site is a static HTML file, so it deploys anywhere.
+
+**GitHub Pages**
+
+1. Push your `index.html` to the `main` branch.
+2. Go to your repo Settings, then Pages.
+3. Set Source to "Deploy from a branch" and pick `main` with the `/ (root)` folder.
+4. Save. Your site goes live at `https://oogaboogapooga.github.io/Unwatermark/` within a minute or two.
+
+**Netlify**
+
+1. Go to app.netlify.com/drop and drag your `index.html` onto the page.
+2. You'll get a temporary URL instantly.
+3. Create a free Netlify account to keep the site permanently.
+4. Under Domain management, add your custom domain. Netlify gives you the exact DNS records to paste into Cloudflare.
+
+**Cloudflare Pages**
+
+1. Push your code to GitHub.
+2. In the Cloudflare dashboard, go to Workers & Pages.
+3. Create an application, choose Pages, then import an existing Git repository.
+4. Select the repo. Leave the framework preset as "None" and the build command empty.
+5. Save and deploy. Cloudflare gives you a free `.pages.dev` URL.
+
+## Custom domain
+
+This project uses a free `eu.org` domain pointed through Cloudflare:
+
+1. Register at nic.eu.org and request your subdomain.
+2. Add the domain to Cloudflare and copy the two nameservers they give you.
+3. Paste those nameservers into the EU.org request form and submit.
+4. Once approved, point your DNS records at your host (GitHub Pages, Netlify, or Cloudflare Pages).
+5. Turn the orange cloud on in Cloudflare for free HTTPS and DDoS protection.
+
+## Built with
+
+- **HTML/CSS** — no framework, no build step
+- **Vanilla JavaScript** — the inpainting engine, UI logic, and encoding pipeline
+- **Canvas API** — frame processing and preview
+- **MediaRecorder API** — local video encoding
+- **Web Audio API** — audio routing for the exported file
+
+No npm packages. No bundler. No dependencies.
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
+
+## Credits
+
+Made by [shifyee](https://www.youtube.com/@shifyee).
+
+If this tool saved you time, consider subscribing or starring the repo.
+
+---
+
+**Disclaimer:** Stripping a watermark from content you don't own or have a licence for is copyright infringement in most jurisdictions. Common legitimate uses include cleaning up footage you shot yourself, removing a stock preview mark after licensing, or de-cluttering archive material you hold rights to. It's on you to get that right.
